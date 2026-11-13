@@ -1,0 +1,1852 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f6f8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>传感器刷题</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<style>:root{
+  --bg:#f5f6f8; --card:#fff; --text:#1c1f24; --dim:#6b7280; --line:#e5e7eb;
+  --accent:#0f766e; --good:#16a34a; --mid:#d97706; --bad:#dc2626;
+  --radius:14px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--text);
+  font:16px/1.7 system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  padding-bottom:64px;
+}
+a{color:var(--accent);text-decoration:none}
+img{max-width:100%}
+.wrap{max-width:820px;margin:0 auto;padding:0 14px}
+
+/* ---------- 顶栏 ---------- */
+.topbar{position:sticky;top:0;z-index:20;background:rgba(245,246,248,.92);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line)}
+.topbar .inner{max-width:820px;margin:0 auto;padding:10px 14px;display:flex;align-items:center;gap:14px}
+.brand{font-weight:700;font-size:15px;letter-spacing:.3px}
+.nav{display:flex;gap:2px;margin-left:auto;flex-wrap:wrap}
+.nav a{padding:6px 10px;border-radius:9px;color:var(--dim);font-size:14px}
+.nav a.on{color:var(--accent);background:#e8efff;font-weight:600}
+
+/* ---------- 底部 tab（手机） ---------- */
+.tabbar{display:none}
+@media(max-width:720px){
+  .nav{display:none}
+  .tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:30;background:#fff;
+    border-top:1px solid var(--line);padding:6px 0 calc(6px + env(safe-area-inset-bottom))}
+  .tabbar a{flex:1;text-align:center;font-size:12px;color:var(--dim);padding:4px 0}
+  .tabbar a.on{color:var(--accent);font-weight:600}
+  .tabbar .ico{display:block;font-size:17px;line-height:1.3}
+}
+
+/* ---------- 卡片 ---------- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:18px 18px 16px;margin:14px 0;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.card h1{font-size:19px;margin:0 0 10px}
+.card h2{font-size:16px;margin:18px 0 8px}
+.meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.chip{font-size:12px;color:var(--dim);background:#f0f1f3;border-radius:999px;padding:2px 9px}
+.chip.t{background:#e8efff;color:#2f6fed}
+
+.grid{display:grid;gap:10px}
+.grid.g2{grid-template-columns:1fr 1fr}
+.grid.g4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:720px){.grid.g4{grid-template-columns:1fr 1fr}.grid.g2{grid-template-columns:1fr}}
+
+.stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px}
+.stat .n{font-size:22px;font-weight:700}
+.stat .l{font-size:12px;color:var(--dim)}
+
+/* ---------- 按钮 ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  border:1px solid var(--line);background:#fff;color:var(--text);border-radius:11px;
+  padding:10px 14px;font-size:15px;cursor:pointer;font-family:inherit;min-height:44px}
+.btn:active{transform:scale(.985)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.btn.ghost{background:#fff}
+.btn.block{width:100%}
+.btn.bad{border-color:#fecaca;background:#fef2f2;color:var(--bad);font-weight:600}
+.btn.mid{border-color:#fde68a;background:#fffbeb;color:var(--mid);font-weight:600}
+.btn.good{border-color:#bbf7d0;background:#f0fdf4;color:var(--good);font-weight:600}
+.btn:disabled{opacity:.5}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>.btn{flex:1}
+
+/* ---------- 练题页 ---------- */
+.progress{position:sticky;top:41px;z-index:15;background:var(--bg);padding:10px 0 4px}
+@media(max-width:720px){.progress{top:41px}}
+.phead{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--dim);margin-bottom:6px}
+.track{height:5px;background:#e6e8ec;border-radius:99px;overflow:hidden}
+.track i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s}
+
+.stem{font-size:16.5px;line-height:1.75}
+/* 代码块：stem/ref/ansbox 三处都要有，否则历史详情里的代码会变成裸文本 */
+.stem pre,.ref pre,.ansbox pre{background:#0f172a;color:#e6edf7;border-radius:10px;padding:12px 13px;
+  overflow-x:auto;max-width:100%;white-space:pre;word-break:normal;
+  font:13.5px/1.6 ui-monospace,SFMono-Regular,Consolas,"Courier New",monospace;margin:10px 0;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+.stem code,.ref code,.ansbox code{background:#f0f1f3;padding:1px 5px;border-radius:5px;
+  font:13.5px/ui-monospace,SFMono-Regular,Consolas,monospace}
+.stem pre code,.ref pre code,.ansbox pre code{background:none;padding:0;font-size:inherit;
+  color:inherit;white-space:pre}
+.stem table,.ref table,.ansbox table{border-collapse:collapse;width:100%;margin:10px 0;font-size:14px;
+  display:block;overflow-x:auto}
+.stem th,.stem td,.ref th,.ref td,.ansbox th,.ansbox td{border:1px solid var(--line);padding:6px 9px;text-align:left}
+.stem blockquote,.ref blockquote,.ansbox blockquote{margin:10px 0;padding:8px 12px;border-left:3px solid #cbd5e1;
+  background:#f8fafc;color:#475569;border-radius:0 8px 8px 0}
+/* 正文密度：默认段间距太松，手机上显示的行数太少 */
+.stem p,.ref p,.ansbox p{margin:8px 0}
+.stem ul,.stem ol,.ref ul,.ref ol,.ansbox ul,.ansbox ol{margin:8px 0;padding-left:22px}
+.stem li,.ref li,.ansbox li{margin:3px 0}
+.stem h3,.ref h3,.ansbox h3{font-size:15.5px;margin:14px 0 6px}
+
+textarea{width:100%;min-height:130px;border:1px solid var(--line);border-radius:12px;padding:12px;
+  font:15px/1.7 inherit;resize:vertical;background:#fff;font-family:inherit}
+textarea:focus{outline:2px solid #c9dafc;border-color:var(--accent)}
+
+.opts{display:flex;flex-direction:column;gap:9px;margin:12px 0}
+.opt{display:flex;gap:10px;align-items:flex-start;text-align:left;width:100%;
+  border:1px solid var(--line);background:#fff;border-radius:12px;padding:12px;cursor:pointer;
+  font:15px/1.6 inherit;color:var(--text)}
+.opt .k{font-weight:700;color:var(--dim);min-width:18px}
+.opt.sel{border-color:var(--accent);background:#f5f8ff}
+.opt.ok{border-color:#bbf7d0;background:#f0fdf4}
+.opt.no{border-color:#fecaca;background:#fef2f2}
+
+.ref{margin-top:16px;border-top:1px dashed var(--line);padding-top:14px}
+.label{font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.5px;
+  margin:14px 0 6px;text-transform:none}
+.label:first-child{margin-top:0}
+
+.grade{position:sticky;bottom:0;background:linear-gradient(to top,var(--bg) 70%,transparent);
+  padding:12px 0 8px;margin-top:14px}
+.hidden{display:none!important}
+.muted{color:var(--dim);font-size:13px}
+
+/* ---------- 列表 ---------- */
+.list{display:flex;flex-direction:column;gap:10px}
+.item{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.item .t{font-size:15px;line-height:1.6}
+.item .m{font-size:12px;color:var(--dim);margin-top:6px;display:flex;gap:8px;flex-wrap:wrap}
+details summary{cursor:pointer;color:var(--accent);font-size:14px;margin-top:8px;list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:"▸ ";}
+details[open] summary::before{content:"▾ "}
+.ansbox{margin-top:10px;padding:12px;background:#f8fafc;border-radius:10px;border:1px solid var(--line)}
+.myans{margin-top:8px;padding:10px 12px;background:#fffdf5;border:1px solid #fde68a;border-radius:10px;
+  font-size:14.5px;white-space:pre-wrap}
+.badge{font-size:12px;border-radius:6px;padding:1px 7px;font-weight:600}
+.badge.ok{background:#ecfdf5;color:var(--good)}
+.badge.no{background:#fef2f2;color:var(--bad)}
+.badge.mid{background:#fffbeb;color:var(--mid)}
+
+input[type=text],input[type=number],select{border:1px solid var(--line);border-radius:10px;
+  padding:10px 12px;font:15px inherit;background:#fff;width:100%}
+label.f{display:block;font-size:13px;color:var(--dim);margin:12px 0 5px}
+.bars{display:flex;align-items:flex-end;gap:4px;height:90px}
+.bars .b{flex:1;background:#dbeafe;border-radius:4px 4px 0 0;min-height:2px;position:relative}
+.bars .b i{position:absolute;left:0;right:0;bottom:0;background:var(--accent);border-radius:4px 4px 0 0}
+
+/* ===== 应用外壳 =====
+   不用 position:fixed 做底栏：Firefox Android 里固定元素会跟着地址栏伸缩抖动，
+   键盘弹出时也不像 Chrome 那样缩布局视口。改成整页不滚动、内容区自己滚。 */
+html,body{height:100%;overflow:hidden}
+body{display:flex;flex-direction:column;padding-bottom:0 !important}
+#root{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-bottom:8px}
+
+.tabbar a{text-decoration:none}
+.tabbar{
+  display:flex !important;
+  position:static !important; flex:0 0 auto; z-index:30;
+  background:#fff; border-top:1px solid var(--line);
+  padding:6px 0 calc(6px + env(safe-area-inset-bottom));
+}
+.tabbar a{flex:1;text-align:center;font-size:12px;color:var(--dim);padding:4px 0}
+.tabbar a.on{color:var(--accent);font-weight:600}
+.tabbar .ico{display:block;font-size:17px;line-height:1.3}
+
+/* 桌面：底栏做成居中的悬浮条（仍是静态布局，不固定） */
+@media (min-width:721px){
+  .tabbar{
+    width:min(560px, 92vw); margin:0 auto 14px;
+    border:1px solid var(--line); border-radius:16px;
+    box-shadow:0 8px 28px rgba(16,24,40,.10);
+    padding:6px 4px;
+  }
+  .tabbar a{font-size:13px}
+  .fab{bottom:120px}
+}
+
+/* ---------- 折叠目录（练习范围）----------
+   字号层级：全部 16 > 模块 15 > 章 14 > 小节 13.5，越往下越细、越浅 */
+.mod-row{display:flex;align-items:center;gap:8px;margin:20px 2px 2px;cursor:pointer;
+  -webkit-user-select:none;user-select:none}
+.mod-row .mod{margin:0;flex:1}
+.mod-chev{font-size:10px;color:var(--dim);width:10px;transition:transform .15s}
+.mod-chev.open{transform:rotate(90deg)}
+.mod-row .num{flex:0 0 30px;text-align:right;color:var(--dim);font-size:12px;
+  font-variant-numeric:tabular-nums}
+.mod{font-size:15px;color:var(--text);letter-spacing:0;font-weight:700}
+.cbt{width:16px;height:16px;flex:0 0 auto;accent-color:var(--accent)}
+.leaf.all{border-bottom:1px solid #eceef1;padding-left:2px}
+.leaf.all .leaf-t{font-size:16px;font-weight:700;color:var(--text)}
+.acc{border:0;background:transparent;margin:0}
+.acc-head{display:flex;align-items:center;gap:8px;width:100%;padding:11px 2px 11px 14px;
+  border-bottom:1px solid #eceef1;background:transparent;
+  font-size:14px;line-height:1.5;font-family:inherit;font-weight:600;color:#374151;
+  cursor:pointer;text-align:left}
+.acc-head .acc-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acc-head .chev{display:inline-block;color:var(--dim);transition:transform .22s ease;font-size:11px}
+.acc.open .acc-head .chev{transform:rotate(90deg)}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .26s ease}
+.acc.open .acc-body{max-height:1600px}
+.leaf{display:flex;align-items:center;gap:8px;padding:9px 2px 9px 34px;
+  border-bottom:1px dashed #f1f2f4;font-size:13.5px;color:#4b5563;cursor:pointer}
+.leaf:last-child{border-bottom:0}
+.leaf input{margin:0;flex:0 0 auto}
+.leaf-t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.num{flex:0 0 30px;text-align:right;color:var(--dim);font-size:12px;
+  font-variant-numeric:tabular-nums;padding-right:2px}
+.mk{flex:0 0 14px;display:flex;align-items:center;justify-content:center}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%}
+.dot.red{background:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,.12)}
+.dot.yellow{background:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.14)}
+.dot.blue{background:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.14)}
+
+/* ---------- 未来 7 天复习量 ---------- */
+.fc{display:flex;align-items:flex-end;gap:6px;height:96px;margin-top:12px}
+.fc-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.fc-n{font-size:11px;color:var(--dim);margin-bottom:4px;font-variant-numeric:tabular-nums}
+.fc-bar{display:block;width:100%;background:#dbeafe;border-radius:5px 5px 0 0;min-height:2px}
+.fc-lb{font-size:10.5px;color:var(--dim);margin-top:5px;white-space:nowrap}
+.spread{margin-top:12px;padding-top:10px;border-top:1px dashed #eef0f3}
+.spread-msg{margin:8px 0 0;font-size:12.5px;color:var(--accent);line-height:1.6}
+.btn.tiny{padding:5px 12px;font-size:12.5px;flex:0 0 auto}
+
+/* ---------- 薄弱点排行 ---------- */
+.wk{margin-top:8px}
+.wk-row{display:flex;align-items:center;gap:10px;padding:10px 2px;
+  border-bottom:1px dashed #eef0f3;cursor:pointer}
+.wk-row:last-child{border-bottom:0}
+.wk-row:active{background:#f8fafc}
+.wk-n{flex:1;min-width:0;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wk-t{font-size:12px;color:var(--dim);flex:0 0 auto}
+.wk-r{font-size:12px;color:var(--bad);font-weight:600;flex:0 0 40px;text-align:right;
+  font-variant-numeric:tabular-nums}
+
+/* ---------- 答案编辑 + 颜色笔 ---------- */
+.ans-edit{min-height:130px;border:1px solid var(--line);border-radius:12px;padding:12px;
+  font-size:15px;line-height:1.7;font-family:inherit;background:#fff;outline:none;
+  white-space:pre-wrap;word-break:break-word;
+  -webkit-user-select:text;user-select:text}
+.ans-edit:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(47,111,237,.12)}
+.ans-edit:empty:before{content:attr(data-ph);color:#9aa1ab}
+.myans.rich span{white-space:pre-wrap}
+
+/* 颜色笔：点一下换笔色，之后打的字就是这个颜色 */
+.penbar{display:flex;align-items:center;gap:6px;margin-top:8px;padding:6px 10px;
+  border:1px solid var(--line);border-radius:12px;background:#fbfcfe}
+.pen-lab{font-size:12px;color:var(--dim);margin-right:2px}
+.penbar .pk{border:0;background:transparent;padding:0;cursor:pointer;width:28px;height:28px;
+  display:flex;align-items:center;justify-content:center;border-radius:50%}
+.penbar .pk .c{width:20px;height:20px;border-radius:50%;display:block;
+  border:1px solid rgba(15,23,42,.16)}
+.penbar .pk .c.hl{background:#ffe066}
+.penbar .pk .c.r{background:#dc2626}
+.penbar .pk .c.g{background:#16a34a}
+.penbar .pk .c.b{background:#2563eb}
+.penbar .pk.on{box-shadow:0 0 0 2px var(--accent)}
+.penbar .clr{width:auto;height:26px;padding:0 10px;margin-left:auto;font-size:12.5px;
+  color:var(--dim);border:1px solid var(--line);border-radius:8px;background:#fff}
+.penbar .clr.on{color:var(--text);border-color:var(--text)}
+
+.pause{margin-left:auto;border:1px solid var(--line);background:#fff;border-radius:8px;
+  padding:3px 9px;font-size:12px;color:var(--dim);cursor:pointer;line-height:1.6}
+.pause:active{background:#f1f5ff}
+.ans-hl{background:#fff3a3;padding:0 2px;border-radius:3px}
+.ans-r{color:#dc2626}
+.ans-g{color:#16a34a}
+.ans-b{color:#2563eb}
+.card.cont{border-color:#c7d7fe;background:linear-gradient(180deg,#f7faff,#fff)}
+
+/* ---------- 历史：按题目归并 ---------- */
+.rec{padding:12px 2px;border-bottom:1px dashed #eef0f3}
+.rec:last-child{border-bottom:0}
+.rec .sum{display:flex;align-items:center;gap:8px}
+.rec .txt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rec .sub{font-size:11.5px;color:var(--dim);margin:4px 0 0 16px}
+.tl-item{border-left:2px solid #e8eaee;padding:2px 0 2px 10px;margin:10px 0}
+.tl-h{display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:12px}
+.pill{font-size:11px;padding:1px 7px;border-radius:999px;flex:0 0 auto}
+.pill.ok{background:#ecfdf5;color:#16a34a}
+.pill.mid{background:#fffbeb;color:#d97706}
+.pill.no{background:#fef2f2;color:#dc2626}
+
+/* ---------- 疑问本 ---------- */
+.nrow{padding:10px 0;border-bottom:1px dashed #f1f2f4}
+.nrow:last-child{border-bottom:0}
+.nrow .nt{font-size:14px;line-height:1.6;white-space:pre-wrap}
+.nrow .nm{display:flex;align-items:center;gap:8px;margin-top:5px;font-size:11.5px;color:var(--dim)}
+.nrow .del{margin-left:auto;border:0;background:none;color:#cbd5e1;cursor:pointer;font-size:14px;padding:2px 6px}
+.nrow .del:hover{color:#ef4444}
+
+/* ---------- 做题页：顶部进度不跟随滚动 + 手机排版 ---------- */
+.progress{position:static!important;top:auto!important;background:transparent;
+  padding:6px 0 2px;margin-bottom:6px}
+.phead{font-size:12.5px}
+.phead .muted{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  margin:0 8px;text-align:right}
+/* 判分栏也别粘着，避免和底部 tab 打架 */
+.grade{position:static!important;background:transparent;padding:10px 0 4px;margin-top:10px}
+.stem pre,.ref pre,.ansbox pre{font-size:12.5px;line-height:1.55;white-space:pre;
+  overflow-x:auto;-webkit-overflow-scrolling:touch;tab-size:4;max-width:100%}
+/* 之前这里的 translateZ / will-change 反而让底栏在滚动时抖，去掉 */
+
+@media(max-width:720px){
+  .card{padding:14px 14px 12px}
+  .card h1{font-size:17px}
+  .stem{font-size:15px;line-height:1.66}
+  .stem pre,.ref pre,.ansbox pre{font-size:11.5px;line-height:1.5;padding:10px 11px;border-radius:9px}
+  .stem table,.ref table{font-size:13px}
+  .stem h3,.ref h3{font-size:15px}
+  .note-panel textarea{font-size:14px}
+}
+
+/* ---------- 疑问小窗 ---------- */
+.fab{position:fixed;right:18px;bottom:96px;z-index:40;width:50px;height:50px;border-radius:50%;
+  border:0;background:var(--accent);color:#fff;font-size:20px;cursor:pointer;
+  box-shadow:0 6px 20px rgba(47,111,237,.35);transition:transform .18s ease,box-shadow .18s ease}
+.fab:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(47,111,237,.42)}
+.fab:active{transform:scale(.94)}
+@media(min-width:721px){.fab{bottom:110px}}
+
+.note-panel{position:fixed;right:16px;bottom:158px;z-index:41;width:min(360px,calc(100vw - 32px));
+  background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;
+  box-shadow:0 18px 48px rgba(16,24,40,.18);
+  opacity:0;transform:translateY(14px) scale(.96);transform-origin:bottom right;
+  pointer-events:none;transition:opacity .2s ease,transform .22s cubic-bezier(.2,.8,.3,1);
+  overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.note-panel.open{opacity:1;transform:none;pointer-events:auto}
+.note-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.note-head b{font-size:15px}
+.note-x{border:0;background:none;color:var(--dim);cursor:pointer;font-size:13px;
+  font-family:inherit;padding:4px 6px}
+.note-list{max-height:150px;overflow:auto;margin-top:10px}
+.note-item{background:#f8fafc;border:1px solid var(--line);border-radius:9px;padding:7px 9px;
+  font-size:13px;line-height:1.55;margin-bottom:6px;white-space:pre-wrap}
+.note-item .t{display:block;color:var(--dim);font-size:11px;margin-top:3px}
+.note-panel textarea{min-height:84px;font-size:14px}
+
+/* 手机：疑问面板改成铺满屏幕的卡片，输入框在最上面——
+   这样无论键盘多高都盖不住输入框（Firefox 里 fixed 元素不会自动避让键盘） */
+@media(max-width:720px){
+  .note-panel{
+    left:0;right:0;top:0;bottom:0;width:auto;max-height:none;
+    border-radius:0;border:0;padding:14px 14px calc(14px + env(safe-area-inset-bottom));
+    display:flex;flex-direction:column;overflow-y:auto;
+    transform:translateY(16px);transform-origin:center bottom;
+  }
+  .note-panel.open{transform:none}
+  .note-panel textarea{min-height:120px}
+  .note-list{max-height:none;flex:1;min-height:40px}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>window.__BANK__ = [{"id": "S001", "module": "传感器", "chapter": "第1章 传感器基本概念与特性", "topic": "1.1 概念与分类", "outline_ref": "1.1", "qtype": "short", "stage_label": "1.1", "difficulty": 1, "plain": "什么叫传感器？它由哪几部分组成？它们的作用及相互关系如何？", "stem_html": "<p>什么叫传感器？它由哪几部分组成？它们的作用及相互关系如何？<\/p>", "answer_html": "<p><strong>定义（背这句）<\/strong>：传感器是能感受规定的被测量，并按照一定规律转换成可用输出信号的器件或装置。<\/p>\n<p><strong>四个组成部分<\/strong>：<\/p>\n<table><thead><tr><th>组成<\/th><th>作用<\/th><\/tr><\/thead><tbody><tr><td>敏感元件<\/td><td>直接感受或响应被测量<\/td><\/tr><tr><td>转换元件<\/td><td>把被测量转换成适于传输、测量的电信号<\/td><\/tr><tr><td>信号调理与转换电路<\/td><td>输出信号微弱，需要放大、运算、调制<\/td><\/tr><tr><td>辅助电源<\/td><td>供信号调理电路和传感器工作<\/td><\/tr><\/tbody><\/table>\n<p><strong>相互关系<\/strong>：被测量 → 敏感元件 → 转换元件 → 信号调理电路 → 可用信号输出。<\/p>\n<p>敏感元件只负责「感受」，转换元件才负责「变成电信号」，这两级是整个传感器的核心。后面两级是因为传感器输出一般都很微弱，必须放大、运算、调制才能用；而调理电路和传感器本身又都要供电，所以信号调理转换电路和所需的电源也应算作传感器的组成部分。<\/p>\n<p><strong>要点（自评用）<\/strong><\/p>\n<ol>\n<li>定义三要素：感受规定的被测量、按一定规律转换、输出可用信号<\/li>\n<li>四个组成：敏感元件、转换元件、调理电路、辅助电源<\/li>\n<li>「感受」是敏感元件，「转换」是转换元件，别答反<\/li>\n<\/ol>"}, {"id": "S002", "module": "传感器", "chapter": "第1章 传感器基本概念与特性", "topic": "1.1 概念与分类", "outline_ref": "1.1", "qtype": "short", "stage_label": "1.1", "difficulty": 1, "plain": "列举传感器的分类。", "stem_html": "<p>列举传感器的分类。<\/p>", "answer_html": "<p>教材给两种主流分类方法：<\/p>\n<table><thead><tr><th>分类依据<\/th><th>举例<\/th><\/tr><\/thead><tbody><tr><td>按被测参数分类<\/td><td>温度传感器、压力传感器、位移传感器、速度传感器<\/td><\/tr><tr><td>按工作原理分类<\/td><td>应变式、电容式、压电式、磁电式传感器<\/td><\/tr><\/tbody><\/table>\n<p>再补两种常见的（问「还知道哪些」时用得上）：按能量关系分为<strong>能量转换型（有源型）<\/strong>和<strong>能量控制型（无源型）<\/strong>；按输出信号分为<strong>模拟式<\/strong>和<strong>数字式<\/strong>。<\/p>\n<p><strong>要点（自评用）<\/strong><\/p>\n<ol>\n<li>两种主分类：按被测参数、按工作原理<\/li>\n<li>每种能随口举 3 到 4 个例子<\/li>\n<li>补充分类记「能量关系」「输出信号」两条<\/li>\n<\/ol>"}, {"id": "S003", "module": "传感器", "chapter": "第1章 传感器基本概念与特性", "topic": "1.2 基本特性", "outline_ref": "1.2", "qtype": "short", "stage_label": "1.2", "difficulty": 1, "plain": "传感器的基本特性包括哪些？分别用什么指标描述？", "stem_html": "<p>传感器的基本特性包括哪些？分别用什么指标描述？<\/p>", "answer_html": "<p><strong>静态特性<\/strong>：被测量的值处于稳定状态（不随时间变化，或随时间变化很缓慢）时的输出—输入关系。<\/p>\n<p>用一组性能指标描述：<strong>灵敏度、迟滞、线性度、重复性和漂移<\/strong>。<\/p>\n<p><strong>动态特性<\/strong>：输入量随时间变化时，传感器的响应特性。有两套分析方法：<\/p>\n<table><thead><tr><th>方法<\/th><th>相应的性能指标<\/th><\/tr><\/thead><tbody><tr><td>瞬态响应法（时域分析法）<\/td><td>时间常数 τ、延迟时间 td、上升时间 tr、超调量 σ、衰减比 d<\/td><\/tr><tr><td>频率响应法<\/td><td>通频带、工作频带、时间常数 τ、固有频率 ωn<\/td><\/tr><\/tbody><\/table>\n<p>记忆抓手：静态看「准不准、稳不稳」，动态看「跟不跟得上」。时域看时间指标（延迟、上升、超调），频域看频带和固有频率。<\/p>\n<p><strong>要点（自评用）<\/strong><\/p>\n<ol>\n<li>静态 = 被测量不变，动态 = 输入随时间变<\/li>\n<li>静态五指标：灵敏度、迟滞、线性度、重复性、漂移<\/li>\n<li>动态两方法：时域（τ、td、tr、σ、d）+ 频域（通频带、工作频带、τ、ωn）<\/li>\n<\/ol>"}, {"id": "S004", "module": "传感器", "chapter": "第1章 传感器基本概念与特性", "topic": "1.3 计算题精讲", "outline_ref": "1.3", "qtype": "short", "stage_label": "1.3", "difficulty": 1, "plain": "当被测介质温度为 t1、测温传感器示值温度为 t2 时有方程 t1 = t2 + τ0·(dt2/dτ) 成立。被测介质温度从 25℃ 突然变化到 300℃，传感器时间常数 τ0 …", "stem_html": "<p>当被测介质温度为 t1、测温传感器示值温度为 t2 时有方程 t1 = t2 + τ0·(dt2/dτ) 成立。被测介质温度从 25℃ 突然变化到 300℃，传感器时间常数 τ0 = 120s，求经过 350s 后的动态误差。<\/p>", "answer_html": "<p><strong>这题考什么<\/strong>：一阶传感器的阶跃响应。<\/p>\n<p><strong>第一步：先把这个方程读懂<\/strong><\/p>\n<p>原式里的 τ 是时间变量（就是 t），τ0 才是时间常数，两个符号长得像，先分清：<\/p>\n<pre><code>t1 = t2 + τ0 · (dt2/dt)<\/code><\/pre>\n<ul>\n<li>t1 是输入：介质真实温度<\/li>\n<li>t2 是输出：传感器示值<\/li>\n<li>稳态时 dt2/dt = 0，于是 t2 = t1，<strong>没有误差<\/strong><\/li>\n<li>温度突变时 t2 跟不上 t1，示值落后，这个落后量就是<strong>动态误差<\/strong><\/li>\n<\/ul>\n<p><strong>第二步：一阶系统的阶跃响应<\/strong><\/p>\n<p>阶跃输入下，归一化输出（从 0 走到 1 的比例）为：<\/p>\n<pre><code>y(t) = 1 - e^(-t/τ0)<\/code><\/pre>\n<p>代入 τ0 = 120s、t = 350s：<\/p>\n<pre><code>t/τ0 = 350 / 120 = 2.917\ne^(-2.917) = 0.0541\ny = 1 - 0.0541 = 0.946<\/code><\/pre>\n<p>含义：经过 350s，示值已经走完了总变化量的 94.6%。<\/p>\n<p><strong>第三步：把 94.6% 换算成温度<\/strong><\/p>\n<p>总变化量 = 300 - 25 = 275℃<\/p>\n<pre><code>已跟上部分 = 275 × 0.946 = 260.1℃\n当前示值   = 25 + 260.1 = 285.1℃\n动态误差   = 300 - 285.1 = 14.9℃<\/code><\/pre>\n<p>一步到位的写法：<\/p>\n<pre><code>Δ = 总变化量 × (1 - y) = 275 × (1 - 0.946) = 275 × 0.054 = 14.9℃<\/code><\/pre>\n<p><strong>答案：动态误差约 14.9℃<\/strong>（原解答给 14.88，它取 y = 0.945，差别只在四舍五入）<\/p>\n<p><strong>易错点<\/strong>：误差乘的是 (1 - y)，不是 y。y 表示「已经跟上多少」，没跟上的那部分才是误差。<\/p>\n<p><strong>要点（自评用）<\/strong><\/p>\n<ol>\n<li>y = 1 - e^(-t/τ0)，t/τ0 越大 y 越接近 1<\/li>\n<li>误差 = 总变化量 × (1 - y)<\/li>\n<li>经过 5 个时间常数后残差只剩 0.67%，工程上认为已稳定<\/li>\n<\/ol>"}, {"id": "S005", "module": "传感器", "chapter": "第1章 传感器基本概念与特性", "topic": "1.3 计算题精讲", "outline_ref": "1.3", "qtype": "short", "stage_label": "1.3", "difficulty": 1, "plain": "某传感器属于一阶环节，用于测量 100Hz 的正弦信号。若幅值误差限制在 5% 以内，时间常数 τ 应取多少？若用该传感器测量 50Hz 的正弦信号，幅值误差和相位差各是多少？", "stem_html": "<p>某传感器属于一阶环节，用于测量 100Hz 的正弦信号。若幅值误差限制在 5% 以内，时间常数 τ 应取多少？若用该传感器测量 50Hz 的正弦信号，幅值误差和相位差各是多少？<\/p>", "answer_html": "<p><strong>这题考什么<\/strong>：一阶系统的频率响应。<\/p>\n<p><strong>第一步：两个公式必须记牢<\/strong><\/p>\n<pre><code>幅频特性  A(ω) = 1 / √(1 + (ωτ)²)\n相频特性  φ(ω) = -arctan(ωτ)<\/code><\/pre>\n<p>ω 是<strong>角频率<\/strong>，ω = 2πf，单位 rad/s。这一步最容易翻车：直接拿 f 乘 τ，数值会差 2π 倍。<\/p>\n<p><strong>第二步：由「幅值误差 ≤ 5%」反推 τ<\/strong><\/p>\n<p>幅值误差限制在 5% 以内，等价于 A ≥ 0.95：<\/p>\n<pre><code>1 / √(1+(ωτ)²) = 0.95\n√(1+(ωτ)²)   = 1 / 0.95 = 1.0526\n1+(ωτ)²       = 1.1080\n(ωτ)²         = 0.1080\nωτ            = 0.3287<\/code><\/pre>\n<p>f = 100Hz，所以 ω = 2π × 100 = 628.3 rad/s：<\/p>\n<pre><code>τ = 0.3287 / 628.3 = 5.23×10⁻⁴ s<\/code><\/pre>\n<p><strong>第三步：用这个 τ 去算 50Hz<\/strong><\/p>\n<p>f = 50Hz，ω = 2π × 50 = 314.2 rad/s：<\/p>\n<pre><code>ωτ     = 314.2 × 5.23×10⁻⁴ = 0.1643\n(ωτ)²  = 0.0270\nA(ω)   = 1 / √(1.0270) = 1 / 1.0134 = 0.9868<\/code><\/pre>\n<p>幅值误差 = 1 - 0.9868 = <strong>1.3%<\/strong><\/p>\n<p>相位差：<\/p>\n<pre><code>φ(ω) = -arctan(0.1643) = -9.33°<\/code><\/pre>\n<p><strong>答案：τ ≈ 5.23×10⁻⁴ s；测量 50Hz 时幅值误差 1.3%，相位差 -9.33°<\/strong><\/p>\n<p><strong>原解答有一处笔误<\/strong>：它写的是 <code>1/√(1+(50×0.0005)²)<\/code>，把角频率写成了频率 f，漏掉 2π。正确代入应该是 ωτ = 2π×50×0.000523 = 0.164。它最后的 0.986 这个数值是对的，只是式子写错了，所以看着对不上、算不出来。<\/p>\n<p><strong>要点（自评用）<\/strong><\/p>\n<ol>\n<li>A(ω) = 1/√(1+(ωτ)²)，φ(ω) = -arctan(ωτ)<\/li>\n<li>ω = 2πf，绝不能拿 f 直接乘 τ<\/li>\n<li>τ 越小通频带越宽、动态误差越小，但抗干扰能力也越弱<\/li>\n<\/ol>"}, {"id": "S006", "module": "传感器", "chapter": "第1章 传感器基本概念与特性", "topic": "1.3 计算题精讲", "outline_ref": "1.3", "qtype": "short", "stage_label": "1.3", "difficulty": 1, "plain": "有一个二阶系统的力传感器（课后习题 2 7）。已知固有频率为 800Hz，阻尼比 ξ = 0.14，问用它测试 400Hz 的正弦力时，幅值比 A(ω) 和相位角 φ(ω) 各为多…", "stem_html": "<p>有一个二阶系统的力传感器（课后习题 2-7）。已知固有频率为 800Hz，阻尼比 ξ = 0.14，问用它测试 400Hz 的正弦力时，幅值比 A(ω) 和相位角 φ(ω) 各为多少？若阻尼比改为 ξ = 0.7，A(ω) 和 φ(ω) 又如何变化？<\/p>", "answer_html": "<p><strong>这题考什么<\/strong>：二阶系统的频率响应。<\/p>\n<p><strong>第一步：公式<\/strong><\/p>\n<pre><code>A(ω) = 1 / √( [1-(ω/ω0)²]² + [2ξ(ω/ω0)]² )\nφ(ω) = -arctan( 2ξ(ω/ω0) / [1-(ω/ω0)²] )<\/code><\/pre>\n<p>频率比 ω/ω0 就是 f/f0，是个<strong>无量纲比值<\/strong>。用 Hz 直接算和用 rad/s 算结果完全一样，因为上下都有 2π，约掉了。所以这题直接用 f/f0 最省事。<\/p>\n<p><strong>第二步：ξ = 0.14 时<\/strong><\/p>\n<pre><code>ω/ω0     = 400 / 800 = 0.5\n(ω/ω0)²  = 0.25\n1 - 0.25 = 0.75          → 0.75² = 0.5625\n2ξ(ω/ω0) = 2×0.14×0.5 = 0.14  → 0.14² = 0.0196\n\nA = 1 / √(0.5625 + 0.0196) = 1 / √0.5821 = 1 / 0.763 = 1.31\nφ = -arctan(0.14 / 0.75) = -arctan(0.187) = -10.6°<\/code><\/pre>\n<p><strong>第三步：ξ = 0.7 时<\/strong><\/p>\n<pre><code>2ξ(ω/ω0) = 2×0.7×0.5 = 0.7   → 0.7² = 0.49\n\nA = 1 / √(0.5625 + 0.49) = 1 / √1.0525 = 1 / 1.026 = 0.97\nφ = -arctan(0.7 / 0.75) = -arctan(0.933) = -43°<\/code><\/pre>\n<p><strong>答案<\/strong><\/p>\n<table><thead><tr><th>阻尼比 ξ<\/th><th>幅值比 A(ω)<\/th><th>相位角 φ(ω)<\/th><\/tr><\/thead><tbody><tr><td>0.14<\/td><td>1.31（放大了 31%）<\/td><td>-10.6°<\/td><\/tr><tr><td>0.70<\/td><td>0.97（衰减 3%）<\/td><td>-43°<\/td><\/tr><\/tbody><\/table>\n<p><strong>这题真正要你得的结论<\/strong>：ξ = 0.14 时 A = 1.31 &gt; 1，说明在 ω/ω0 = 0.5 附近发生了共振，测出来的幅值比真实值大 31%，严重失真；改成 ξ = 0.7 后 A ≈ 0.97，幅值基本不失真，代价是相位滞后变大。<\/p>\n<p>所以二阶传感器的阻尼比工程上取 <strong>0.6~0.7<\/strong>：这个区间幅频曲线最平坦，相位也接近线性。<\/p>\n<p><strong>要点（自评用）<\/strong><\/p>\n<ol>\n<li>分母是两个平方项：[1-(ω/ω0)²]² 和 [2ξ(ω/ω0)]²，别漏第二个<\/li>\n<li>ω/ω0 就是 f/f0，比值无量纲<\/li>\n<li>ξ 太小会共振放大，工程取 0.6~0.7<\/li>\n<\/ol>"}, {"id": "S007", "module": "传感器", "chapter": "第3章 应变式传感器", "topic": "3.1 应变效应与工作原理", "outline_ref": "3.1", "qtype": "short", "stage_label": "3.1", "difficulty": 1, "plain": "什么叫应变效应？利用应变效应解释金属电阻应变片的工作原理。", "stem_html": "<p>什么叫应变效应？利用应变效应解释金属电阻应变片的工作原理。<\/p>", "answer_html": "<p><strong>应变效应<\/strong>：在外力作用下，导体或半导体材料产生机械变形，从而引起材料电阻值发生相应变化的现象。<\/p>\n<p><strong>表达式<\/strong>：<\/p>\n<pre><code>ΔR/R = K · ε<\/code><\/pre>\n<p>式中 K 为材料的应变灵敏系数。当应变材料为金属或合金时，在弹性极限内 K 为常数。<\/p>\n<p><strong>金属电阻应变片的工作原理<\/strong>：电阻应变片的电阻相对变化量 ΔR/R 与金属材料的轴向应变 ε 成正比。所以把应变片贴在被测物体上，物体受力变形 → 应变片跟着变形 → 电阻相对变化量 → 再用电桥把这个电阻变化变成电压。这就是「应变 → 电阻变化 → 电压信号」的转换链。<\/p>\n<p><strong>要点（自评用）<\/strong><\/p>\n<ol>\n<li>应变效应 = 受力变形导致电阻变化，主体是「导体或半导体材料」<\/li>\n<li>核心公式 ΔR/R = K·ε，K 在弹性极限内是常数<\/li>\n<li>应变片的作用是把 ε 转换成电阻相对变化量，不是直接出电压<\/li>\n<\/ol>"}, {"id": "S008", "module": "传感器", "chapter": "第3章 应变式传感器", "topic": "3.2 温度误差与补偿", "outline_ref": "3.2", "qtype": "short", "stage_label": "3.2", "difficulty": 1, "plain": "试述应变片温度误差的概念、产生原因和补偿办法。", "stem_html": "<p>试述应变片温度误差的概念、产生原因和补偿办法。<\/p>", "answer_html": "<p><strong>概念<\/strong>：由于测量现场环境温度偏离应变片标定温度而给测量带来的附加误差，称为应变片温度误差。<\/p>\n<p><strong>产生原因<\/strong>（两条）：<\/p>\n<ol>\n<li>电阻丝存在<strong>温度系数<\/strong>，温度改变时应变片的标称电阻值发生变化<\/li>\n<li>试件与电阻丝材料的<strong>线膨胀系数不同<\/strong>，温度变化引起附加变形，使应变片产生附加电阻<\/li>\n<\/ol>\n<p><strong>补偿办法<\/strong>（两大类）：<\/p>\n<table><thead><tr><th>类别<\/th><th>具体做法<\/th><\/tr><\/thead><tbody><tr><td>线路补偿法<\/td><td>电桥补偿法（最常用、效果较好）<\/td><\/tr><tr><td>应变片自补偿法<\/td><td>采用温度自补偿应变片或双金属线栅应变片代替一般应变片，使之兼顾温度补偿作用<\/td><\/tr><\/tbody><\/table>\n<p><strong>要点（自评用）<\/strong><\/p>\n<ol>\n<li>温度误差 = 温度偏离标定温度带来的附加误差<\/li>\n<li>两个原因：电阻温度系数、线膨胀系数不匹配<\/li>\n<li>两条路：线路补偿（电桥）、应变片自补偿<\/li>\n<\/ol>"}, {"id": "S009", "module": "传感器", "chapter": "第3章 应变式传感器", "topic": "3.2 温度误差与补偿", "outline_ref": "3.2", "qtype": "short", "stage_label": "3.2", "difficulty": 1, "plain": "试述电阻应变片电桥温度补偿。", "stem_html": "<p>试述电阻应变片电桥温度补偿。<\/p>", "answer_html": "<p>做法：在被测试件上安装一片<strong>工作应变片<\/strong>，在另一块与被测试件材料相同、但<strong>不受力<\/strong>的补偿件上安装一片<strong>补偿应变片<\/strong>。补偿件与被测试件处在完全相同的温度场内。<\/p>\n<p>测量时，把两片接入电桥的<strong>相邻臂<\/strong>。因为补偿片 RB 与工作片 R1 是完全相同的，又都贴在相同的试件上、处于相同的温度下，所以温度变化使工作片产生的电阻变化 ΔR1t 与补偿片的电阻变化 RBt 相等。<\/p>\n<p>两者在相邻臂上的作用相互抵消，于是<strong>电桥输出 Usc 与温度无关<\/strong>，温度误差就被补偿掉了。<\/p>\n<p>一句话记法：<strong>同一温度场 + 相同应变片 + 一片受力一片不受力 + 接相邻臂<\/strong>。<\/p>\n<p><strong>要点（自评用）<\/strong><\/p>\n<ol>\n<li>补偿件不受力，只受同样的温度<\/li>\n<li>补偿片和工作片必须接相邻臂<\/li>\n<li>靠「温度引起的电阻变化相等」在相邻臂上抵消<\/li>\n<\/ol>"}, {"id": "S010", "module": "传感器", "chapter": "第3章 应变式传感器", "topic": "3.2 温度误差与补偿", "outline_ref": "3.2", "qtype": "short", "stage_label": "3.2", "difficulty": 1, "plain": "试述电阻应变片温度自补偿法。", "stem_html": "<p>试述电阻应变片温度自补偿法。<\/p>", "answer_html": "<p>思路：利用自身就具有温度补偿作用的应变片来补偿，温度变化时产生的附加应变<strong>为零或相互抵消<\/strong>。<\/p>\n<p><strong>条件推导<\/strong>。温度变化 Δt 时，应变片上产生的附加电阻相对变化由两部分构成：<\/p>\n<pre><code>ΔRt/R = α·Δt + K·(βs - βg)·Δt<\/code><\/pre>\n<ul>\n<li>α：敏感栅材料的电阻温度系数<\/li>\n<li>K：应变灵敏系数<\/li>\n<li>βs：试件的线膨胀系数<\/li>\n<li>βg：敏感栅（电阻丝）的线膨胀系数<\/li>\n<\/ul>\n<p>要让温度变化时不产生附加电阻，即 ΔRt = 0，括号里必须为零：<\/p>\n<pre><code>α + K·(βs - βg) = 0<\/code><\/pre>\n<p>所以自补偿条件为：<\/p>\n<pre><code>α = -K·(βs - βg)<\/code><\/pre>\n<p><strong>怎么用这个条件<\/strong>：先选好试件材料（βs 定了），再挑敏感栅材料，使它的 α 和 βg 恰好满足上式。这样温度怎么变，应变片的电阻都不因温度而变。<\/p>\n<p>常见做法有两种：一是选用温度自补偿应变片，二是用双金属线栅应变片。<\/p>\n<p><strong>要点（自评用）<\/strong><\/p>\n<ol>\n<li>自补偿条件 α = −K(βs − βg)<\/li>\n<li>四个符号含义：α 电阻温度系数、K 灵敏系数、βs 试件膨胀系数、βg 栅材膨胀系数<\/li>\n<li>物理含义：用敏感栅自身的热膨胀和电阻温度特性，去抵消试件热膨胀带来的附加应变<\/li>\n<\/ol>"}, {"id": "S011", "module": "传感器", "chapter": "第3章 应变式传感器", "topic": "3.3 直流电桥", "outline_ref": "3.3", "qtype": "short", "stage_label": "3.3", "difficulty": 1, "plain": "什么是直流电桥？若按桥臂工作方式不同，可分为哪几种？各自的输出电压如何计算？", "stem_html": "<p>什么是直流电桥？若按桥臂工作方式不同，可分为哪几种？各自的输出电压如何计算？<\/p>", "answer_html": "<p><strong>定义<\/strong>：工作电源 E 为直流电源的电桥电路，称为直流电桥。<\/p>\n<p>按接入应变片的桥臂数量，分为三种：<\/p>\n<table><thead><tr><th>类型<\/th><th>桥臂构成<\/th><th>输出电压<\/th><\/tr><\/thead><tbody><tr><td>单臂电桥<\/td><td>R1 为应变片，R2、R3、R4 为固定电阻<\/td><td>U0 = (E/4)·(ΔR1/R1)<\/td><\/tr><tr><td>差动半桥<\/td><td>R1、R2 为应变片且应变方向相反，R3、R4 固定<\/td><td>U0 = (E/2)·(ΔR1/R1)<\/td><\/tr><tr><td>差动全桥<\/td><td>R1~R4 全为应变片，相邻桥臂应变方向相反<\/td><td>U0 = E·(ΔR1/R1)<\/td><\/tr><\/tbody><\/table>\n<p><strong>关键规律<\/strong>：相邻桥臂的应变方向<strong>相反<\/strong>时输出相加，<strong>相同<\/strong>时相互抵消；相对桥臂正好反过来。所以贴片时要让相邻臂感受到相反的应变。<\/p>\n<p><strong>灵敏度对比<\/strong>：以单臂为 1，半桥是 2 倍，全桥是 4 倍。这也是实际测量优先用全桥的原因。<\/p>\n<p><strong>要点（自评用）<\/strong><\/p>\n<ol>\n<li>三种接法：单臂 E/4、半桥 E/2、全桥 E，都乘 ΔR1/R1<\/li>\n<li>相邻臂应变反向才相加，同向会抵消<\/li>\n<li>全桥灵敏度是单臂的 4 倍，还能自动补偿温度误差<\/li>\n<\/ol>"}, {"id": "S012", "module": "传感器", "chapter": "第3章 应变式传感器", "topic": "3.4 计算题精讲", "outline_ref": "3.4", "qtype": "short", "stage_label": "3.4", "difficulty": 1, "plain": "题 3 5 图为一直流应变电桥。图中 E = 4V，R1 = R2 = R3 = R4 = 120Ω，试问：① 若 R1 为金属应变片，其余为外接电阻，当 R1 的增量为 ΔR1 …", "stem_html": "<p>题 3-5 图为一直流应变电桥。图中 E = 4V，R1 = R2 = R3 = R4 = 120Ω，试问：① 若 R1 为金属应变片，其余为外接电阻，当 R1 的增量为 ΔR1 = 1.2Ω 时，电桥输出电压 U0 为多少？② 若 R1、R2 都是应变片，且批号相同，感受应变的极性和大小都相同，其余为外接电阻，则 U0 为多少？③ 题②中如果 R2 与 R1 感受应变的极性相反，且 ΔR1 = ΔR2 = 1.2Ω，则 U0 为多少？<\/p>", "answer_html": "<p><strong>这题考什么<\/strong>：直流电桥的三种工作状态，以及「相邻臂反向才相加」这条规律。<\/p>\n<p><strong>先把电桥输出公式摆出来<\/strong>（后面三问都用它）：<\/p>\n<pre><code>U0 = [ R2/(R1+R2) - R4/(R3+R4) ] · E<\/code><\/pre>\n<p>其中 R1、R2 组成一臂（上支路），R3、R4 组成另一臂（下支路）。初始四个电阻相等，电桥平衡，U0 = 0。<\/p>\n<p><strong>第①问：单臂电桥<\/strong><\/p>\n<p>只有 R1 变化，R1 → R1 + ΔR1，其余不变。这就是标准单臂电桥，直接套简化式：<\/p>\n<pre><code>U0 = (E/4) · (ΔR1/R1)\n   = (4/4) × (1.2 / 120)\n   = 1 × 0.01\n   = 0.01 V<\/code><\/pre>\n<p><strong>答案：U0 = 0.01 V = 10 mV<\/strong><\/p>\n<p><strong>第②问：两片接相邻臂，但受力方向相同<\/strong><\/p>\n<p>R1、R2 都是应变片且同批号，受应变大小方向都相同，所以：<\/p>\n<pre><code>R1 = R2 = R，  ΔR1 = ΔR2 = ΔR<\/code><\/pre>\n<p>代入完整公式：<\/p>\n<pre><code>U0 = [ (R+ΔR) / ((R+ΔR)+(R+ΔR)) - 120/240 ] · E\n   = [ (R+ΔR)/(2(R+ΔR)) - 1/2 ] · E\n   = [ 1/2 - 1/2 ] · E\n   = 0<\/code><\/pre>\n<p><strong>答案：U0 = 0<\/strong><\/p>\n<p><strong>为什么是零<\/strong>：两片电阻完全相同、变化也相同，桥臂比还是 1:1，电桥依然平衡。这是题目的用意——<strong>同向应变放在相邻臂会互相抵消<\/strong>，起不到提高灵敏度的作用。<\/p>\n<p><strong>第③问：两片接相邻臂，受力方向相反<\/strong><\/p>\n<p>R1 受拉、R2 受压，变化量大小相同、符号相反：<\/p>\n<pre><code>R1 = R + ΔR，  R2 = R - ΔR<\/code><\/pre>\n<p>代入完整公式：<\/p>\n<pre><code>U0 = [ (R-ΔR) / ((R+ΔR)+(R-ΔR)) - 120/240 ] · E\n   = [ (R-ΔR)/(2R) - 1/2 ] · E\n   = [ 1/2 - ΔR/(2R) - 1/2 ] · E\n   = - (ΔR/(2R)) · E\n   = - (1.2 / 240) × 4\n   = - 0.02 V<\/code><\/pre>\n<p><strong>答案：U0 = −0.02 V，大小 20 mV，极性与第①问相反<\/strong><\/p>\n<p>负号只表示输出极性翻转，说明差动接法下输出方向随应变方向变。要知道大小的话是 0.02 V。<\/p>\n<p><strong>三问连起来看，这才是考点<\/strong>：<\/p>\n<table><thead><tr><th>接法<\/th><th>输出<\/th><th>相对灵敏度<\/th><\/tr><\/thead><tbody><tr><td>单臂（第①问）<\/td><td>0.01 V<\/td><td>1<\/td><\/tr><tr><td>相邻臂同向（第②问）<\/td><td>0<\/td><td>0，白贴<\/td><\/tr><tr><td>相邻臂反向（第③问）<\/td><td>0.02 V<\/td><td>2<\/td><\/tr><\/tbody><\/table>\n<p>半桥差动把灵敏度做到单臂的 2 倍，而第②问说明<strong>贴片方向贴错了等于白干<\/strong>。实际布片时，「相邻臂感受相反应变」是硬性要求。<\/p>\n<p><strong>要点（自评用）<\/strong><\/p>\n<ol>\n<li>单臂用 E/4·ΔR/R，半桥用 E/2·ΔR/R，全桥用 E·ΔR/R<\/li>\n<li>同向应变接相邻臂 → 输出为零，不提高灵敏度<\/li>\n<li>反向接相邻臂 → 灵敏度翻倍，且能自动抵消温度误差<\/li>\n<\/ol>"}, {"id": "S013", "module": "传感器", "chapter": "第3章 应变式传感器", "topic": "3.4 计算题精讲", "outline_ref": "3.4", "qtype": "short", "stage_label": "3.4", "difficulty": 1, "plain": "图示为等强度梁测力系统，R1 为电阻应变片，应变片灵敏系数 K = 2.05，未受应变时 R1 = 120Ω。当试件受力 F 时，应变片承受平均应变 ε = 800μm/m，求：(…", "stem_html": "<p>图示为等强度梁测力系统，R1 为电阻应变片，应变片灵敏系数 K = 2.05，未受应变时 R1 = 120Ω。当试件受力 F 时，应变片承受平均应变 ε = 800μm/m，求：(1) 应变片电阻变化量 ΔR1 和电阻相对变化量 ΔR1/R1；(2) 将 R1 置于单臂测量电桥，电桥电源电压为直流 3V，求电桥输出电压及电桥非线性误差；(3) 若要减小非线性误差，应采取何种措施？并分析其电桥输出电压及非线性误差大小。<\/p>", "answer_html": "<p><strong>这题考什么<\/strong>：应变片的电阻变化计算 + 单臂电桥输出 + 单臂电桥的非线性误差，最后一问是「怎么改进」。<\/p>\n<p><strong>第(1)问：电阻变化<\/strong><\/p>\n<p>先注意单位：ε = 800 μm/m 就是 800×10⁻⁶，无量纲。<\/p>\n<pre><code>ΔR1/R1 = K · ε\n       = 2.05 × 800×10⁻⁶\n       = 1.64×10⁻³<\/code><\/pre>\n<pre><code>ΔR1 = (ΔR1/R1) × R1\n    = 1.64×10⁻³ × 120\n    = 0.197 Ω<\/code><\/pre>\n<p><strong>答案：ΔR1 = 0.197Ω，ΔR1/R1 = 1.64×10⁻³<\/strong><\/p>\n<p><strong>第(2)问：单臂电桥输出电压 + 非线性误差<\/strong><\/p>\n<p>先算理想（线性）输出：<\/p>\n<pre><code>U0 = (E/4) · (ΔR1/R1)\n   = (3/4) × 1.64×10⁻³\n   = 0.75 × 1.64×10⁻³\n   = 1.23×10⁻³ V<\/code><\/pre>\n<p><strong>答案：U0 ≈ 1.23 mV<\/strong><\/p>\n<p>再说非线性误差。单臂电桥的精确输出是：<\/p>\n<pre><code>U0实际 = (E/4) · (ΔR1/R1) · 1/(1 + ΔR1/(2R1))<\/code><\/pre>\n<p>比理想值小，因为分母多了个 ΔR1/(2R1)。这个相对偏差就是非线性误差：<\/p>\n<pre><code>γ = ΔR1 / (2R1)\n  = 1.64×10⁻³ / 2\n  = 8.2×10⁻⁴\n  = 0.082%<\/code><\/pre>\n<p><strong>答案：非线性误差约 0.082%<\/strong><\/p>\n<p>这个量很小，因为金属应变片的 ΔR/R 本身就在 10⁻³ 量级。但它是<strong>系统误差<\/strong>，不能说可以忽略——测力精度要求 0.1% 以下时就必须处理。<\/p>\n<p><strong>第(3)问：怎么减小非线性误差<\/strong><\/p>\n<p>最有效的办法是改成<strong>差动电桥<\/strong>，让非线性项在相邻臂上一正一负抵消掉。<\/p>\n<p><strong>方案一：差动半桥<\/strong>（R1 受拉、R2 受压，R3、R4 固定）<\/p>\n<pre><code>U0 = (E/2) · (ΔR1/R1)\n   = (3/2) × 1.64×10⁻³\n   = 2.46×10⁻³ V  = 2.46 mV<\/code><\/pre>\n<p>非线性误差：理论上<strong>为零<\/strong>（一阶项被完全抵消），残余的高阶项可忽略。<\/p>\n<p><strong>方案二：差动全桥<\/strong>（四片全用，相邻臂反向）<\/p>\n<pre><code>U0 = E · (ΔR1/R1)\n   = 3 × 1.64×10⁻³\n   = 4.92×10⁻³ V  = 4.92 mV<\/code><\/pre>\n<p>非线性误差：同样<strong>近似为零<\/strong>。<\/p>\n<p><strong>三种接法对比<\/strong>：<\/p>\n<table><thead><tr><th>接法<\/th><th>输出电压<\/th><th>非线性误差<\/th><\/tr><\/thead><tbody><tr><td>单臂<\/td><td>1.23 mV<\/td><td>0.082%<\/td><\/tr><tr><td>差动半桥<\/td><td>2.46 mV<\/td><td>≈0<\/td><\/tr><tr><td>差动全桥<\/td><td>4.92 mV<\/td><td>≈0<\/td><\/tr><\/tbody><\/table>\n<p><strong>结论<\/strong>：改成差动接法一举两得——输出信号成倍变大，非线性误差同时被消掉，还顺带补偿了温度误差。代价是要多贴应变片、对准受力方向。这就是实际工程里几乎都用差动电桥的原因。<\/p>\n<p>除了差动，还有两条辅助路子：限制应变范围（让 ΔR/R 更小，非线性自然更小）、改用恒流源供电。但它们不如差动直接。<\/p>\n<p><strong>要点（自评用）<\/strong><\/p>\n<ol>\n<li>先算 ΔR/R = K·ε，再乘 R1 得 ΔR1，注意 ε 的单位是 10⁻⁶<\/li>\n<li>单臂非线性误差 γ = ΔR1/(2R1)，数量级一般 0.1% 上下<\/li>\n<li>差动半桥输出翻倍、全桥再翻倍，非线性都接近零<\/li>\n<\/ol>"}];</script>
+<script>/* 传感器刷题 · 离线单页版
+   题库在 window.__BANK__，答题记录存 localStorage，导出/导入按 id 合并。 */
+(function () {
+  'use strict';
+
+  const BANK = window.__BANK__ || [];
+  const KEY = 'sensor.data.v1';
+  const QT = { short: '简答', code_read: '程序阅读', handwrite: '手撕', single: '单选', multi: '多选', judge: '判断', fill: '填空' };
+  const GRADE = { 0: '错', 1: '半对', 2: '对' };
+
+  let S = load();
+  let session = null;
+  let cur = null;
+
+  const $ = (s, r) => (r || document).querySelector(s);
+  const app = () => document.getElementById('app');
+
+  function load() {
+    try {
+      const d = JSON.parse(localStorage.getItem(KEY));
+      if (d && Array.isArray(d.attempts)) return d;
+    } catch (e) { }
+    return { attempts: [] };
+  }
+  function save() { localStorage.setItem(KEY, JSON.stringify(S)); }
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  }
+  function go(name) {
+    // hash 相同不会触发 hashchange，这里手动重绘
+    if (location.hash === '#' + name) route();
+    else location.hash = '#' + name;
+  }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  }
+  function qById(id) { return BANK.find(q => q.id === id); }
+
+  // 老数据（纯文本，可能带 ==高亮== / [r]…[/r] 标记）渲染
+  function answerRich(text) {
+    let s = esc(text);
+    s = s.replace(/\[([rgb])\]([\s\S]*?)\[\/\1\]/g, function (m, c, t) {
+      return '<span class="ans-' + c + '">' + t + '</span>';
+    });
+    s = s.replace(/==([\s\S]*?)==/g, '<mark class="ans-hl">$1</mark>');
+    return s;
+  }
+
+  // 富文本答案的白名单清洗：只留 span/br/div/b/i/u，样式只留 color 和 background-color
+  function sanitizeAnswerHtml(html) {
+    const box = document.createElement('div');
+    box.innerHTML = html;
+    const ALLOW = { SPAN: 1, BR: 1, DIV: 1, P: 1, B: 1, I: 1, U: 1, MARK: 1 };
+
+    function clean(node) {
+      const kids = Array.prototype.slice.call(node.childNodes);
+      kids.forEach(function (n) {
+        if (n.nodeType === 3) return;                 // 文本，保留
+        if (n.nodeType !== 1) { n.remove(); return; } // 注释等，丢掉
+        if (!ALLOW[n.tagName]) {                      // 不在白名单：拆掉外壳，保留内容
+          while (n.firstChild) node.insertBefore(n.firstChild, n);
+          node.removeChild(n);
+          return;
+        }
+        Array.prototype.slice.call(n.attributes).forEach(function (a) {
+          if (a.name === 'style') {
+            const keep = [];
+            if (n.style.color) keep.push('color:' + n.style.color);
+            if (n.style.backgroundColor) keep.push('background-color:' + n.style.backgroundColor);
+            if (keep.length) n.setAttribute('style', keep.join(';'));
+            else n.removeAttribute('style');
+          } else {
+            n.removeAttribute(a.name);
+          }
+        });
+        clean(n);
+      });
+    }
+    clean(box);
+    return box.innerHTML;
+  }
+
+  // 统一入口：新数据是 HTML，老数据是纯文本（可能带标记）
+  function answerView(raw) {
+    if (!raw) return '';
+    if (/<(span|br|div|p|b|i|u|mark)\b/i.test(raw)) return sanitizeAnswerHtml(raw);
+    return answerRich(raw);
+  }
+
+  /* ---------------- 未完成的练习（暂存） ---------------- */
+  const SESSION_KEY = 'sensor.session.v1';
+
+  function saveSessionNow() {
+    if (!session) return;
+    if (session.pos >= session.queue.length) { clearSavedSession(); return; }
+    try {
+      localStorage.setItem(SESSION_KEY, JSON.stringify({
+        ids: session.queue.map(q => q.id), pos: session.pos, at: Date.now()
+      }));
+    } catch (e) { }
+  }
+  function clearSavedSession() {
+    try { localStorage.removeItem(SESSION_KEY); } catch (e) { }
+  }
+  function loadSavedSession() {
+    try {
+      const d = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+      if (!d || !Array.isArray(d.ids)) return null;
+      const qs = d.ids.map(qById).filter(Boolean);
+      if (!qs.length || d.pos >= qs.length) return null;
+      return { queue: qs, pos: d.pos, at: d.at };
+    } catch (e) { return null; }
+  }
+
+  /* ---------------- 派生统计 ---------------- */
+  function attemptsOf(qid) {
+    return S.attempts.filter(a => a.qid === qid).sort((x, y) => x.ts - y.ts);
+  }
+  function qState(qid) {
+    const list = attemptsOf(qid);
+    if (!list.length) return { seen: 0, last: null, wrong: 0, streak: 0 };
+    let streak = 0;
+    for (let i = list.length - 1; i >= 0; i--) {
+      if (list[i].grade === 2) streak++; else break;
+    }
+    return {
+      seen: list.length,
+      last: list[list.length - 1],
+      wrong: list.filter(a => a.grade < 2).length,
+      streak: streak
+    };
+  }
+  function pool() {
+    return BANK.filter(q => { const st = qState(q.id); return st.last && st.last.grade < 2; });
+  }
+  function mastered() {
+    return BANK.filter(q => qState(q.id).streak >= 2);
+  }
+  function overview() {
+    const total = S.attempts.length;
+    const right = S.attempts.filter(a => a.grade === 2).length;
+    const days = {};
+    S.attempts.forEach(a => {
+      const d = new Date(a.ts).toISOString().slice(0, 10);
+      days[d] = (days[d] || 0) + 1;
+    });
+    let streak = 0;
+    const oneDay = 86400000;
+    let d = new Date();
+    if (!days[d.toISOString().slice(0, 10)]) d = new Date(Date.now() - oneDay);
+    while (days[d.toISOString().slice(0, 10)]) { streak++; d = new Date(d.getTime() - oneDay); }
+    const byTopic = {};
+    S.attempts.forEach(a => {
+      const q = qById(a.qid); if (!q) return;
+      const k = q.topic;
+      byTopic[k] = byTopic[k] || { n: 0, ok: 0 };
+      byTopic[k].n++; if (a.grade === 2) byTopic[k].ok++;
+    });
+    return {
+      bank: BANK.length, total, right,
+      acc: total ? Math.round(right * 100 / total) : 0,
+      pool: pool().length, mastered: mastered().length,
+      today: days[new Date().toISOString().slice(0, 10)] || 0,
+      streak, byTopic
+    };
+  }
+
+  /* ---------------- 视图 ---------------- */
+  function nav() {
+    const tabs = [['home', '◎', '总览'], ['pick', '✎', '练习'], ['wrong', '✗', '错题'], ['hist', '☰', '历史'], ['more', 'ⓘ', '设置']];
+    return '<nav class="tabbar">' + tabs.map(([k, ico, label]) =>
+      '<a href="#' + k + '" data-tab="' + k + '"><span class="ico">' + ico + '</span>' + label + '</a>').join('') + '</nav>';
+  }
+
+  /* ---------------- 复习调度（简化遗忘曲线） ---------------- */
+  // 连对次数 → 下次复习间隔（天）。错了就回到第 1 档。
+  const SRS_DAYS = [1, 2, 4, 7, 15, 30];
+  const DAY = 86400000;
+
+  /* 手动推迟到期时间（重新分配用，不改作答记录）：{ qid: 推迟到的时间戳 } */
+  const SHIFT_KEY = 'sensor.srs.shift.v1';
+  function loadShift() {
+    try { return JSON.parse(localStorage.getItem(SHIFT_KEY) || '{}') || {}; } catch (e) { return {}; }
+  }
+  function saveShift(o) { localStorage.setItem(SHIFT_KEY, JSON.stringify(o)); }
+  function shiftOf(qid) { return Number(loadShift()[qid]) || 0; }
+
+  function dueInfo(qid) {
+    const list = attemptsOf(qid);
+    if (!list.length) return null;
+    let streak = 0;
+    for (let i = list.length - 1; i >= 0; i--) {
+      if (list[i].grade === 2) streak++; else break;
+    }
+    const stage = Math.min(streak, SRS_DAYS.length - 1);
+    const last = list[list.length - 1];
+    const natural = last.ts + SRS_DAYS[stage] * DAY;
+    const ov = shiftOf(qid);
+    return {
+      stage: stage,
+      days: SRS_DAYS[stage],
+      natural: natural,
+      due: ov ? Math.max(natural, ov) : natural,
+      last: last,
+      wrong: list.filter(a => a.grade < 2).length,
+      total: list.length
+    };
+  }
+
+  function endOfToday() {
+    const d = new Date();
+    d.setHours(23, 59, 59, 999);
+    return d.getTime();
+  }
+
+  function dueList() {
+    const out = [];
+    const limit = endOfToday();          // 今天之内到期的都算「今天该复习」
+    BANK.forEach(q => {
+      const d = dueInfo(q.id);
+      if (d && d.due <= limit) out.push({ q: q, d: d });
+    });
+    out.sort((a, b) => a.d.due - b.d.due);
+    return out;
+  }
+
+  // 未来 N 天每天到期多少题（第 0 格 = 今天，含已逾期的）
+  function dueForecast(days) {
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    const base = start.getTime();
+    const buckets = new Array(days).fill(0);
+    BANK.forEach(q => {
+      const d = dueInfo(q.id);
+      if (!d) return;
+      const idx = Math.floor((d.due - base) / DAY);
+      buckets[Math.min(Math.max(idx, 0), days - 1)]++;
+    });
+    return buckets;
+  }
+
+  // 把当前所有到期的题重新摊到未来 N 天
+  let spreadMsg = '';
+  function applySpread(days) {
+    const list = dueList();
+    if (list.length < 2) return 0;
+    const shift = loadShift();
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    const base = start.getTime();
+    list.forEach(function (item, i) {
+      const q = item.q;
+      const dayIdx = i % days;                                   // 交错摊到第 0..days-1 天
+      const target = base + (dayIdx + 1) * DAY - 1000;           // 当天 23:59:59
+      if (target > item.d.natural) shift[q.id] = target;         // 只会往后推，不提前
+      else delete shift[q.id];
+    });
+    saveShift(shift);
+    return list.length;
+  }
+
+  // 薄弱点：按「错题次数」排，其次按错误率。只统计练过的。
+  function weakTopics(limit) {
+    const rows = [];
+    const topics = [...new Set(BANK.map(q => q.topic))];
+    topics.forEach(t => {
+      const qs = BANK.filter(q => q.topic === t);
+      let total = 0, wrong = 0;
+      qs.forEach(q => {
+        const list = attemptsOf(q.id);
+        total += list.length;
+        wrong += list.filter(a => a.grade < 2).length;
+      });
+      if (total > 0 && wrong > 0) rows.push({ topic: t, total: total, wrong: wrong, rate: wrong / total });
+    });
+    rows.sort((a, b) => (b.wrong - a.wrong) || (b.rate - a.rate));
+    return rows.slice(0, limit || 10);
+  }
+
+  function viewForecastCard() {
+    const b = dueForecast(7);
+    const max = Math.max.apply(null, b.concat([1]));
+    const names = ['今天', '明天', '后天'];
+    const cols = b.map((n, i) => {
+      const h = Math.round(n / max * 64) + (n ? 4 : 2);
+      return '<div class="fc-col">' +
+        '<span class="fc-n">' + (n || '') + '</span>' +
+        '<i class="fc-bar" style="height:' + h + 'px"></i>' +
+        '<span class="fc-lb">' + (names[i] || (i + 1) + 'd') + '</span></div>';
+    }).join('');
+    const total = b.reduce((a, c) => a + c, 0);
+    const overdue = dueList().length;
+    const spread = overdue > 1
+      ? '<div class="spread"><span class="muted">积压太多？摊到后面几天：</span>' +
+      '<div class="row" style="margin-top:8px">' +
+      '<button class="btn tiny" data-spread="3" type="button">分 3 天</button>' +
+      '<button class="btn tiny" data-spread="5" type="button">分 5 天</button>' +
+      '<button class="btn tiny" data-spread="7" type="button">分 7 天</button>' +
+      (Object.keys(loadShift()).length ? '<button class="btn tiny" id="unshift" type="button">恢复原计划</button>' : '') +
+      '</div>' +
+      (spreadMsg ? '<p class="spread-msg">' + esc(spreadMsg) + '</p>' : '') +
+      '</div>'
+      : '';
+    return '<div class="card"><div class="row" style="justify-content:space-between">' +
+      '<strong>未来 7 天复习量</strong><span class="muted">共 ' + total + ' 题</span></div>' +
+      '<div class="fc">' + cols + '</div>' + spread + '</div>';
+  }
+
+  function viewWeakCard() {
+    const rows = weakTopics(10);
+    if (!rows.length) return '';
+    return '<div class="card"><div class="row" style="justify-content:space-between">' +
+      '<strong>薄弱点 Top ' + rows.length + '</strong>' +
+      '<span class="muted">按错题次数排</span></div>' +
+      '<div class="wk">' + rows.map(r =>
+        '<div class="wk-row" data-topic="' + esc(r.topic) + '">' +
+        '<span class="wk-n">' + esc(r.topic) + '</span>' +
+        '<span class="wk-t">错 ' + r.wrong + ' / ' + r.total + '</span>' +
+        '<span class="wk-r">' + Math.round(r.rate * 100) + '%</span></div>'
+      ).join('') + '</div>' +
+      '<p class="muted" style="margin:8px 0 0">点一行就直接练这个知识点（已掌握的会跳过）</p></div>';
+  }
+
+  // 只练某一个知识点
+  function startTopic(topic) {
+    let list = BANK.filter(q => q.topic === topic && qLevel(q.id) !== 'blue');
+    if (!list.length) list = BANK.filter(q => q.topic === topic);
+    list.sort((a, b) => qState(b.id).wrong - qState(a.id).wrong);
+    startSession(list.slice(0, 20));
+  }
+
+  function viewContinueCard() {
+    const saved = loadSavedSession();
+    if (!saved) return '';
+    return '<div class="card cont"><strong>有一轮练习没做完</strong>' +
+      '<p class="muted" style="margin:6px 0 0">已做 ' + saved.pos + ' / ' + saved.queue.length + ' 题' +
+      (saved.at ? '，上次 ' + new Date(saved.at).toLocaleString() : '') + '</p>' +
+      '<div class="row" style="margin-top:12px">' +
+      '<button class="btn primary" id="contbtn" type="button">继续</button>' +
+      '<button class="btn" id="dropbtn" type="button">放弃这轮</button></div></div>';
+  }
+
+  function viewHome() {
+    const o = overview();
+    const due = dueList();
+    const dueCard = due.length
+      ? '<div class="card due"><strong>今天该复习 ' + due.length + ' 题</strong>' +
+        '<p class="muted" style="margin:6px 0 0">按遗忘曲线排的：错过/没连对的会更快回来。' +
+        '复习时只看原题，自己判会不会，看答案时能翻到以前写的答案和疑问。</p>' +
+        '<div class="row" style="margin-top:12px">' +
+        '<button class="btn primary" id="doreview" data-n="' + due.length + '">开始复习</button></div></div>'
+      : '<div class="card"><strong>今天没有到期的复习</strong>' +
+        '<p class="muted" style="margin:6px 0 0">继续练新题就好。' +
+        (S.attempts.length ? '下一题到期时间会出现在这里。' : '') + '</p></div>';
+
+    return viewContinueCard() + dueCard + viewForecastCard() + viewWeakCard() +
+      '<div class="card"><h1>今天练点什么</h1>' +
+      '<p class="muted">只有输出才算复习。</p>' +
+      '<div class="row" style="margin-top:12px">' +
+      '<a class="btn primary" href="#pick">开始练习</a>' +
+      '<a class="btn" href="#pick?mode=wrong">错题重练</a></div></div>' +
+      '<div class="grid g4">' +
+      '<div class="stat"><div class="n">' + o.bank + '</div><div class="l">题库</div></div>' +
+      '<div class="stat"><div class="n">' + o.total + '</div><div class="l">累计作答</div></div>' +
+      '<div class="stat"><div class="n">' + o.acc + '%</div><div class="l">正确率</div></div>' +
+      '<div class="stat"><div class="n" style="color:var(--bad)">' + o.pool + '</div><div class="l">待消化错题</div></div>' +
+      '</div>' +
+      '<div class="card"><strong>今天 ' + o.today + ' 题 · 连续 ' + o.streak + ' 天</strong>' +
+      '<p class="muted" style="margin:8px 0 0">' +
+      (cloudReady()
+        ? '云同步已开启，电脑和手机自动对账。'
+        : '数据只在这台设备的浏览器里。想去「设置 → 云同步」填两项配置，就能和另一台设备同步。') +
+      '</p></div>';
+  }
+
+  // 章名本身当 key（"1 指针的本质…" 与 "1 编译的四个步骤" 编号会撞车，不能用序号）
+  const openCh = new Set();
+  let openChInited = false;
+
+  function chapterKey(q) {
+    return (q.chapter || q.topic || '其他').trim();
+  }
+
+  // 单题状态：'' 没练过 / red 最近答错 / yellow 错过但刚对一次 / blue 答对（首次就对或连对两次）
+  function qLevel(qid) {
+    const list = attemptsOf(qid);
+    if (!list.length) return '';
+    if (list[list.length - 1].grade < 2) return 'red';
+    let streak = 0;
+    for (let i = list.length - 1; i >= 0; i--) {
+      if (list[i].grade === 2) streak++; else break;
+    }
+    if (list.length === 1) return 'blue';        // 第一次就答对，直接蓝
+    return streak >= 2 ? 'blue' : 'yellow';      // 错过一次后对一次=黄，对两次=蓝
+  }
+
+  // 小节状态：全部蓝才算蓝；有红就是红；其余（练过但没红没全蓝）算黄
+  function topicStatus(topic) {
+    const lv = BANK.filter(x => x.topic === topic).map(q => qLevel(q.id));
+    if (lv.every(x => !x)) return '';
+    if (lv.every(x => x === 'blue')) return 'blue';
+    if (lv.some(x => x === 'red')) return 'red';
+    return 'yellow';
+  }
+
+  // 选中集合：存小节（topic）。**默认一个都不选 = 全部**
+  const sel = new Set();
+  const openMod = new Set();          // 折叠状态：默认全部收起
+
+  function allTopics() { return [...new Set(BANK.map(q => q.topic))]; }
+  function topicsWhere(fn) { return [...new Set(BANK.filter(fn).map(q => q.topic))]; }
+  function selCount() {
+    return sel.size ? BANK.filter(q => sel.has(q.topic)).length : BANK.length;
+  }
+  function selText() {
+    return sel.size ? '已选 ' + selCount() + ' 题' : '未选 = 全部 ' + BANK.length + ' 题';
+  }
+
+  function checkState(scope, keys) {
+    const all = keys.length > 0 && keys.every(k => sel.has(k));
+    const some = keys.some(k => sel.has(k));
+    return { checked: all, indet: some && !all };
+  }
+
+  function viewPick() {
+    const byCh = {};
+    const modOf = {};
+    BANK.forEach(q => {
+      const mod = q.module || '';
+      const k = mod + '||' + chapterKey(q);
+      if (!byCh[k]) byCh[k] = { name: q.chapter || ('第 ' + k + ' 章'), topics: {} };
+      modOf[k] = mod;
+      byCh[k].topics[q.topic] = true;
+    });
+    const types = [...new Set(BANK.map(q => q.qtype))];
+    const tcount = {};
+    BANK.forEach(q => { tcount[q.qtype] = (tcount[q.qtype] || 0) + 1; });
+
+    let accs = '';
+    const chKeys = Object.keys(byCh);
+    if (!openChInited && chKeys.length) { openCh.add(chKeys[0]); openChInited = true; }
+
+    // 按模块分组渲染：模块头可整选，章头可整选，小节可单选
+    const modOrder = [];
+    const byMod = {};
+    chKeys.forEach(k => {
+      const m = modOf[k];
+      if (!byMod[m]) { byMod[m] = []; modOrder.push(m); }
+      byMod[m].push(k);
+    });
+
+    modOrder.forEach(mod => {
+      const modTopics = topicsWhere(q => (q.module || '') === mod);
+      const modQs = BANK.filter(q => (q.module || '') === mod).length;
+      const mst = checkState('m', modTopics);
+      const modOpen = openMod.has(mod);
+      accs += '<div class="mod-row" data-mod="' + esc(mod) + '">' +
+        '<input type="checkbox" class="cbt" data-scope="m|' + esc(mod) + '"' +
+        (mst.checked ? ' checked' : '') + '>' +
+        '<span class="mod-chev' + (modOpen ? ' open' : '') + '">▶</span>' +
+        '<span class="mod">' + esc(mod) + '</span>' +
+        '<span class="num">' + modQs + '</span></div>';
+      if (!modOpen) return;
+
+      byMod[mod].forEach(k => {
+        const ch = byCh[k];
+        const leaves = Object.keys(ch.topics).sort((a, b) => a.localeCompare(b, 'zh', { numeric: true }));
+        const total = leaves.reduce((n, t) => n + BANK.filter(q => q.topic === t).length, 0);
+        const cst = checkState('c', leaves);
+        accs += '<div class="acc' + (openCh.has(k) ? ' open' : '') + '" data-ch="' + esc(k) + '">' +
+          '<div class="acc-head">' +
+          '<input type="checkbox" class="cbt" data-scope="c|' + esc(mod) + '|' + esc(ch.name) + '"' +
+          (cst.checked ? ' checked' : '') + (cst.indet ? ' data-indet="1"' : '') + '>' +
+          '<span class="chev">▶</span>' +
+          '<span class="acc-name">' + esc(ch.name) + '</span>' +
+          '<span class="num">' + total + '</span></div>' +
+          '<div class="acc-body">' +
+          leaves.map(t => {
+            const st = topicStatus(t);
+            const dot = st === 'blue' ? '<span class="dot blue" title="已掌握"></span>'
+              : st === 'yellow' ? '<span class="dot yellow" title="错过，已对一次"></span>'
+                : st === 'red' ? '<span class="dot red" title="最近答错"></span>' : '';
+            const n = BANK.filter(q => q.topic === t).length;
+            return '<label class="leaf"><input type="checkbox" class="cbt" data-scope="s|' + esc(t) + '"' +
+              (sel.has(t) ? ' checked' : '') + '>' +
+              '<span class="leaf-t">' + esc(t) + '</span>' +
+              '<span class="mk">' + dot + '</span>' +
+              '<span class="num">' + n + '</span></label>';
+          }).join('') +
+          '</div></div>';
+      });
+    });
+
+    const allSt = checkState('all', allTopics());
+    return '<div class="card"><h1>选择练习范围</h1>' +
+      '<label class="f">模式</label><div class="row">' +
+      [['random', '随机'], ['review', '最久未练'], ['wrong', '错题池']].map(([k, l]) =>
+        '<label class="btn ghost" style="flex:1"><input type="radio" name="mode" value="' + k + '"' +
+        (k === 'random' ? ' checked' : '') + '> ' + l + '</label>').join('') + '</div>' +
+      '<label class="f">题型（不选=全部）</label><div class="row">' +
+      types.map(t => '<label class="btn ghost" style="flex:1"><input type="checkbox" name="type" value="' + t + '"> ' +
+        QT[t] + ' <span class="muted" style="margin-left:auto">' + tcount[t] + '</span></label>').join('') + '</div>' +
+      '<label class="f">范围（默认不选 = 全部；点模块名可收起）</label>' +
+      '<label class="leaf all"><input type="checkbox" class="cbt" data-scope="all"' +
+      (allSt.checked ? ' checked' : '') + '><span class="leaf-t"><b>全部 · 传感器</b></span>' +
+      '<span class="num">' + BANK.length + '</span></label>' +
+      accs +
+      '<label class="f">题数</label><input type="number" id="count" value="10" min="1" max="200">' +
+      '<p class="muted" id="selinfo" style="margin:8px 0 0">' + selText() + '</p>' +
+      '<div style="margin-top:12px"><button class="btn primary block" id="go">开始</button></div></div>';
+  }
+
+  // 选完之后刷新所有勾选框状态与「已选 N 题」
+  function syncPickUI() {
+    document.querySelectorAll('.cbt[data-scope]').forEach(cb => {
+      const sc = cb.dataset.scope.split('|');
+      let keys;
+      if (sc[0] === 'all') keys = allTopics();
+      else if (sc[0] === 'm') keys = topicsWhere(q => (q.module || '') === sc[1]);
+      else if (sc[0] === 'c') keys = topicsWhere(q => (q.module || '') === sc[1] &&
+        (q.chapter || q.topic || '').trim() === sc[2]);
+      else keys = [sc[1]];
+      const st = checkState(sc[0], keys);
+      cb.checked = st.checked;
+      cb.indeterminate = st.indet;
+    });
+    const info = document.getElementById('selinfo');
+    if (info) info.textContent = selText();
+  }
+
+  // 点击复选框：模块/章/全部 → 整组加或减；小节 → 单个
+  function onScopeToggle(key, on) {
+    const sc = key.split('|');
+    let targets;
+    if (sc[0] === 'all') targets = allTopics();
+    else if (sc[0] === 'm') targets = topicsWhere(q => (q.module || '') === sc[1]);
+    else if (sc[0] === 'c') targets = topicsWhere(q => (q.module || '') === sc[1] &&
+      (q.chapter || q.topic || '').trim() === sc[2]);
+    else targets = [sc[1]];
+    targets.forEach(t => { if (on) sel.add(t); else sel.delete(t); });
+    syncPickUI();
+  }
+
+  function viewWrong() {
+    const list = pool();
+    const done = mastered();
+    return '<div class="card"><h1>错题池</h1>' +
+      '<p class="muted">待消化 ' + list.length + ' 题 · 已掌握 ' + done.length + ' 题（连对 2 次自动出池）</p>' +
+      '<div class="row" style="margin-top:10px"><button class="btn primary" id="drill">练这批错题</button></div></div>' +
+      (list.length ? '<div class="list">' + list.map(q => {
+        const st = qState(q.id);
+        return '<div class="item"><div class="t">' + esc(q.plain) + '</div><div class="m">' +
+          '<span class="badge no">错 ' + st.wrong + ' 次</span><span>' + QT[q.qtype] + '</span>' +
+          '<span>' + esc(q.topic) + '</span><span class="chip">出处 ' + esc(q.outline_ref || '') + '</span></div></div>';
+      }).join('') + '</div>' : '<div class="card"><p class="muted">池子是空的。</p></div>');
+  }
+
+  const openQ = new Set();
+
+  function viewHist() {
+    const nCount = allNotesFlat().length;
+    const head = '<div class="card"><h1>作答历史</h1>' +
+      '<div class="row" style="margin-top:8px">' +
+      '<a class="btn" href="#notes">疑问本 ' + nCount + '</a>' +
+      '<a class="btn" href="#pick?mode=wrong">错题重练</a></div></div>';
+    if (!S.attempts.length) return head + '<div class="card"><p class="muted">还没有作答记录。</p></div>';
+
+    // 按题目归并，错得多的排前面，全对的排后面
+    const groups = {};
+    S.attempts.forEach(a => { (groups[a.qid] = groups[a.qid] || []).push(a); });
+    const rows = Object.keys(groups).map(qid => {
+      const list = groups[qid].slice().sort((x, y) => x.ts - y.ts);
+      const q = qById(qid);
+      const wrong = list.filter(a => a.grade < 2).length;
+      return { qid: qid, q: q, list: list, wrong: wrong, last: list[list.length - 1] };
+    }).filter(r => r.q);
+
+    rows.sort((a, b) => (b.wrong - a.wrong) || (b.last.ts - a.last.ts));
+
+    return head + '<div class="card">' + rows.map(r => {
+      const q = r.q;
+      const ns = notesOf(r.qid);
+      const lv = qLevel(r.qid);
+      const dot = lv === 'blue' ? '<span class="dot blue"></span>'
+        : lv === 'yellow' ? '<span class="dot yellow"></span>'
+          : lv === 'red' ? '<span class="dot red"></span>' : '';
+      const pillCls = r.last.grade === 2 ? 'ok' : (r.last.grade === 1 ? 'mid' : 'no');
+
+      return '<div class="rec">' +
+        '<div class="sum">' + dot +
+        '<span class="txt">' + esc(q.plain) + '</span>' +
+        '<span class="pill ' + pillCls + '">' + GRADE[r.last.grade] + '</span></div>' +
+        '<div class="sub">共 ' + r.list.length + ' 次 · 错 ' + r.wrong + ' 次 · ' +
+        new Date(r.last.ts).toLocaleDateString() + ' 最近</div>' +
+        '<details><summary>回看这 ' + r.list.length + ' 次作答</summary>' +
+        r.list.map((a, i) => {
+          const c = a.grade === 2 ? 'ok' : (a.grade === 1 ? 'mid' : 'no');
+          return '<div class="tl-item">' +
+            '<div class="tl-h"><span class="pill ' + c + '">' + GRADE[a.grade] + '</span>' +
+            '<span class="muted">' + new Date(a.ts).toLocaleString() + '</span>' +
+            '<span class="muted">#' + (i + 1) + '</span></div>' +
+            '<div class="myans rich">' + (a.answer ? answerView(a.answer) : '（没写文字，直接自评）') + '</div>' +
+            '</div>';
+        }).join('') +
+        '<div class="label">题干</div><div class="ansbox">' + q.stem_html + '</div>' +
+        (ns.length ? '<div class="label">我的疑问</div>' +
+          ns.map(n => '<div class="note-item">' + esc(n.text) + '</div>').join('') : '') +
+        '<div class="label">参考答案</div><div class="ansbox">' + q.answer_html + '</div>' +
+        '</details></div>';
+    }).join('') + '</div>';
+  }
+
+  function viewNotes() {
+    const o = notesAll();
+    const rows = [];
+    Object.keys(o).forEach(qid => (o[qid] || []).forEach(n => rows.push({ qid: qid, n: n })));
+    const head = '<div class="card"><h1>疑问本</h1>' +
+      '<p class="muted">按章节归类。搞懂了就点 ✕ 删掉。</p></div>';
+    if (!rows.length) return head + '<div class="card"><p class="muted">还没有记录疑问。</p></div>';
+
+    const groups = {};
+    rows.forEach(r => {
+      const q = qById(r.qid);
+      const k = q ? q.topic : '通用 / 非题目';
+      (groups[k] = groups[k] || []).push(r);
+    });
+
+    return head + '<div class="card">' +
+      Object.keys(groups).sort((a, b) => a.localeCompare(b, 'zh', { numeric: true })).map(k => {
+        const g = groups[k].slice().sort((x, y) => y.n.ts - x.n.ts);
+        return '<div class="acc open">' +
+          '<div class="acc-head" style="cursor:default"><span>' + esc(k) + '</span>' +
+          '<span class="muted" style="margin-left:auto;font-weight:400">' + g.length + ' 条</span></div>' +
+          '<div class="acc-body" style="max-height:none">' + g.map(r =>
+            '<div class="nrow"><div class="nt">' + esc(r.n.text) + '</div>' +
+            '<div class="nm"><span>' + (qById(r.qid) ? r.qid : '通用') + '</span>' +
+            '<span>' + new Date(r.n.ts).toLocaleString() + '</span>' +
+            '<button class="del" data-del="' + r.qid + '|' + r.n.id + '" title="删除">✕</button></div></div>'
+          ).join('') + '</div></div>';
+      }).join('') + '</div>';
+  }
+
+  function viewMore() {
+    const c = cloudCfg();
+    return '<div class="card"><h1>设置</h1>' +
+      '<p class="muted">题库 ' + BANK.length + ' 题 · 本机记录 ' + S.attempts.length + ' 条</p>' +
+
+      '<div class="label">云同步（Supabase）</div>' +
+      '<p class="muted">填一次，两台设备填同样的两个值，之后作答和错题自动同步。</p>' +
+      '<label class="f">项目 URL</label>' +
+      '<input type="text" id="curl" placeholder="https://xxxx.supabase.co" value="' + esc(c.url || '') + '">' +
+      '<label class="f">anon public key</label>' +
+      '<input type="text" id="ckey" placeholder="eyJhbGciOi..." value="' + esc(c.key || '') + '">' +
+      '<div class="row" style="margin-top:12px">' +
+      '<button class="btn primary" id="csave">保存并测试</button>' +
+      '<button class="btn" id="csync">立即同步</button></div>' +
+      '<p class="muted" id="cloudstat" style="margin-top:10px">' + cloudStatText() + '</p>' +
+
+      '<div class="label">手动备份（云同步之外的第二保险）</div>' +
+      '<div class="row">' +
+      '<button class="btn" id="exp">导出 json</button>' +
+      '<button class="btn" id="imp">导入 json</button></div>' +
+      '<input type="file" id="file" accept=".json,application/json" style="display:none">' +
+
+      '<div class="label">危险操作</div>' +
+      '<button class="btn bad block" id="clr">清空本机记录</button>' +
+      '</div>';
+  }
+
+  /* ---------------- 云同步 ---------------- */
+  const CK = 'sensor.cloud.v1';
+  function cloudCfg() {
+    try { return JSON.parse(localStorage.getItem(CK)) || {}; } catch (e) { return {}; }
+  }
+  function saveCfg(o) { localStorage.setItem(CK, JSON.stringify(o)); }
+  function cloudReady() { const c = cloudCfg(); return !!(c.url && c.key); }
+  function cloudStatText() {
+    const c = cloudCfg();
+    if (!cloudReady()) return '未配置，数据只在本机。';
+    const parts = [];
+    if (c.remote != null) parts.push('云端 ' + c.remote + ' 条');
+    parts.push('本机 ' + S.attempts.length + ' 条');
+    if (c.lastSync) parts.push('上次同步 ' + new Date(c.lastSync).toLocaleTimeString());
+    return parts.join(' · ');
+  }
+  function setStatus(txt) {
+    const el = document.getElementById('cloudstat');
+    if (el) el.textContent = txt;
+  }
+  function normUrl(u) {
+    // 只保留协议+域名，后面多填的 /rest/v1/ 之类自动切掉
+    u = (u || '').trim();
+    const m = u.match(/^(https?:\/\/[^\/\s]+)/i);
+    return m ? m[1] : u.replace(/\/+$/, '');
+  }
+  function apiBase() { return normUrl(cloudCfg().url); }
+  function hdr(c) {
+    return { 'apikey': c.key, 'Authorization': 'Bearer ' + c.key, 'Content-Type': 'application/json' };
+  }
+
+  async function cloudPull() {
+    const c = cloudCfg();
+    const res = await fetch(apiBase() + '/rest/v1/s_attempts?select=id,qid,answer,grade,ts&limit=20000',
+      { headers: hdr(c) });
+    if (!res.ok) {
+      if (res.status === 404) throw new Error('404：URL 填错，或表 attempts 还没建（见配置说明第 2 步）');
+      if (res.status === 401 || res.status === 403) throw new Error('key 不对或权限不足（要用 anon / publishable key）');
+      throw new Error('拉取失败 HTTP ' + res.status);
+    }
+    let rows;
+    try {
+      rows = await res.json();
+    } catch (e) {
+      throw new Error('返回的不是 JSON：URL 要填 https://xxx.supabase.co 这种项目地址');
+    }
+    const seen = new Set(S.attempts.map(a => a.id));
+    let add = 0;
+    rows.forEach(r => {
+      if (!r || !r.id || seen.has(r.id)) return;
+      S.attempts.push({ id: r.id, qid: r.qid, answer: r.answer, grade: r.grade, ts: r.ts });
+      seen.add(r.id); add++;
+    });
+    if (add) save();
+    return { add: add, remote: rows.length };
+  }
+
+  // 推完之后重新数一次云端真实条数（之前的做法是拿 push 之前的数字，会一直显示旧值）
+  async function cloudCount() {
+    try {
+      const res = await fetch(apiBase() + '/rest/v1/s_attempts?select=id&limit=100000',
+        { headers: hdr(cloudCfg()) });
+      if (!res.ok) return null;
+      const rows = await res.json();
+      return Array.isArray(rows) ? rows.length : null;
+    } catch (e) { return null; }
+  }
+
+  async function cloudPush(list) {
+    if (!list.length) return;
+    const c = cloudCfg();
+    const body = list.map(a => ({ id: a.id, qid: a.qid, answer: a.answer, grade: a.grade, ts: a.ts }));
+    const res = await fetch(apiBase() + '/rest/v1/s_attempts', {
+      method: 'POST',
+      headers: Object.assign(hdr(c), { 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) {
+      const t = await res.text();
+      throw new Error('上传失败 HTTP ' + res.status + ' ' + t.slice(0, 90));
+    }
+  }
+
+  let syncing = false;
+  async function syncAll(quiet) {
+    if (!cloudReady()) { if (!quiet) alert('先填 URL 和 key 并保存'); return; }
+    if (syncing) return;
+    syncing = true;
+    try {
+      if (!quiet) setStatus('同步中…');
+      const r = await cloudPull();
+      await cloudPush(S.attempts);
+
+      // 疑问笔记单独一张表，失败不影响作答记录
+      let nAdd = 0, nErr = '';
+      try {
+        nAdd = await notesPull();
+        await notesPush();
+      } catch (e) {
+        nErr = /404/.test(e.message) ? 'notes 表还没建（见配置说明）' : e.message;
+      }
+
+      saveCfg(Object.assign(cloudCfg(), { lastSync: Date.now(), remote: r.remote }));
+      const total = await cloudCount();
+      if (total != null) saveCfg(Object.assign(cloudCfg(), { lastSync: Date.now(), remote: total }));
+      else saveCfg(Object.assign(cloudCfg(), { lastSync: Date.now(), remote: S.attempts.length }));
+      const real = cloudCfg().remote;
+      setStatus('同步完成：云端 ' + real + ' 条 · 本机 ' + S.attempts.length + ' 条' +
+        (r.add ? '（新增 ' + r.add + '）' : '（无新增）') +
+        (nErr ? '｜疑问同步失败：' + nErr : (nAdd ? '｜疑问 +' + nAdd : '')));
+      if (r.add > 0 || nAdd > 0) route();   // 真有新数据才重绘，避免把状态刷掉
+    } catch (e) {
+      setStatus('同步失败：' + e.message);
+    } finally {
+      syncing = false;
+    }
+  }
+
+  /* ---------------- 答题 ---------------- */
+  function pickQuestions() {
+    const mode = ($('input[name=mode]:checked') || {}).value || 'random';
+    const types = [...document.querySelectorAll('input[name=type]:checked')].map(e => e.value);
+    let count = parseInt($('#count').value, 10) || 10;
+
+    let list = sel.size ? BANK.filter(q => sel.has(q.topic)) : BANK.slice();
+    if (types.length) list = list.filter(q => types.includes(q.qtype));
+    // 已经答对的（蓝点）暂时不再出，避免重复消耗时间；错题池除外
+    if (mode !== 'wrong') list = list.filter(q => qLevel(q.id) !== 'blue');
+    if (mode === 'wrong') list = list.filter(q => { const st = qState(q.id); return st.last && st.last.grade < 2; });
+    if (mode === 'review') {
+      list.sort((a, b) => {
+        const sa = qState(a.id), sb = qState(b.id);
+        const ta = sa.last ? sa.last.ts : 0, tb = sb.last ? sb.last.ts : 0;
+        return ta - tb;
+      });
+    } else if (mode === 'random') {
+      for (let i = list.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [list[i], list[j]] = [list[j], list[i]];
+      }
+    }
+    return list.slice(0, count);
+  }
+
+  function startSession(queue) {
+    if (!queue.length) { alert('这个范围里没有题'); return; }
+    session = { queue, pos: 0 };
+    clearSavedSession();
+    saveSessionNow();
+    go('quiz');
+  }
+
+  function viewQuiz() {
+    if (!session || session.pos >= session.queue.length) {
+      clearSavedSession();
+      return '<div class="card"><h1>这一轮结束了</h1><p class="muted">记录已保存。</p>' +
+        '<div class="row" style="margin-top:14px"><a class="btn primary" href="#pick">再来一轮</a>' +
+        '<a class="btn" href="#wrong">看错题</a></div></div>';
+    }
+    cur = session.queue[session.pos];
+    const idx = session.pos + 1, total = session.queue.length;
+    const st = qState(cur.id);
+    const seenChip = st.seen
+      ? '<span class="chip">练过 ' + st.seen + ' 次 · 错 ' + st.wrong + ' 次</span>'
+      : '<span class="chip">第一次做</span>';
+    return '<div class="progress"><div class="phead">' +
+      '<span><b>' + idx + '</b> / ' + total + '</span>' +
+      '<span class="muted">' + esc(cur.topic) + '</span>' +
+      '<button class="pause" id="pauseBtn" type="button">保存退出</button></div>' +
+      '<div class="track"><i style="width:' + (idx / total * 100) + '%"></i></div></div>' +
+      '<div class="card"><div class="meta">' +
+      '<span class="chip t">' + QT[cur.qtype] + '</span>' +
+      '<span class="chip">' + esc(cur.stage_label || '') + '</span>' +
+      seenChip +
+      (notesOf(cur.id).length ? '<span class="chip">疑问 ' + notesOf(cur.id).length + '</span>' : '') +
+      '</div>' +
+      '<div class="stem">' + cur.stem_html + '</div>' +
+      '<div id="ta" class="ans-edit" contenteditable="true" data-ph="先点颜色再写字，写出来就是那个颜色；也可以选中已有的字再点颜色"></div>' +
+      '<div class="penbar" id="penbar">' +
+      '<span class="pen-lab">颜色</span>' +
+      '<button type="button" class="pk" data-pen="hl" title="黄底"><i class="c hl"></i></button>' +
+      '<button type="button" class="pk" data-pen="r" title="红字"><i class="c r"></i></button>' +
+      '<button type="button" class="pk" data-pen="g" title="绿字"><i class="c g"></i></button>' +
+      '<button type="button" class="pk" data-pen="b" title="蓝字"><i class="c b"></i></button>' +
+      '<button type="button" class="pk clr" data-pen="none">清除</button>' +
+      '</div>' +
+      '<div class="grade" style="margin-top:10px"><button class="btn primary block" id="reveal">看参考答案</button></div>' +
+      '<div id="ref" class="ref hidden"></div>' +
+      '<div id="gbox" class="grade hidden"><div class="muted" style="margin-bottom:8px">对照答案，给自己判一下：</div>' +
+      '<div class="row"><button class="btn bad" data-g="0">错</button>' +
+      '<button class="btn mid" data-g="1">半对</button>' +
+      '<button class="btn good" data-g="2">对</button></div></div></div>';
+  }
+
+  const ANS_COLOR = { r: '#dc2626', g: '#16a34a', b: '#2563eb' };
+  const ANS_HL = '#fff3a3';
+
+  /* ---------- 颜色笔：点颜色 → 之后写的字就是这个颜色 ---------- */
+  let pen = '';                 // '' | 'hl' | 'r' | 'g' | 'b'
+
+  function penStyle(kind) {
+    if (kind === 'hl') return { bg: ANS_HL };
+    if (kind === 'r' || kind === 'g' || kind === 'b') return { color: ANS_COLOR[kind] };
+    return null;
+  }
+
+  // 把某段文字外层带颜色的 span 拆掉（清除格式的关键）
+  function unwrapColorAround(node, root) {
+    let el = node.parentNode;
+    while (el && el !== root) {
+      const parent = el.parentNode;
+      if (el.style && (el.style.color || el.style.backgroundColor)) {
+        while (el.firstChild) parent.insertBefore(el.firstChild, el);
+        parent.removeChild(el);
+      }
+      el = parent;
+    }
+  }
+
+  function currentRangeInEditor() {
+    const ta = document.getElementById('ta');
+    const sel = window.getSelection();
+    if (!ta || !sel || !sel.rangeCount) return null;
+    const range = sel.getRangeAt(0);
+    if (!ta.contains(range.commonAncestorContainer)) return null;
+    return range;
+  }
+
+  // 有选区 → 直接给这段上色
+  function paintSelection(range, kind) {
+    const ta = document.getElementById('ta');
+    if (kind === 'none') {
+      const text = range.toString();
+      range.deleteContents();
+      const tn = document.createTextNode(text);
+      range.insertNode(tn);
+      unwrapColorAround(tn, ta);
+      ta.dispatchEvent(new Event('input', { bubbles: true }));
+      return;
+    }
+    const st = penStyle(kind);
+    if (!st) return;
+    const span = document.createElement('span');
+    if (st.color) span.style.color = st.color;
+    if (st.bg) span.style.backgroundColor = st.bg;
+    try {
+      span.appendChild(range.extractContents());
+      range.insertNode(span);
+    } catch (e) { return; }
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    const r2 = document.createRange();
+    r2.selectNodeContents(span);
+    sel.addRange(r2);
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  // 光标所在位置当前生效的颜色
+  function colorAt(node) {
+    const ta = document.getElementById('ta');
+    let el = node && (node.nodeType === 1 ? node : node.parentNode);
+    const res = { color: '', bg: '' };
+    while (el && el !== ta) {
+      if (el.style) {
+        if (!res.color && el.style.color) res.color = el.style.color;
+        if (!res.bg && el.style.backgroundColor) res.bg = el.style.backgroundColor;
+      }
+      el = el.parentNode;
+    }
+    return res;
+  }
+
+  function cssColor(v, prop) {
+    const d = document.createElement('span');
+    d.style[prop || 'color'] = v;
+    return d.style[prop || 'color'];
+  }
+
+  // 当前笔色对应的目标样式
+  function wantStyle() {
+    if (pen === 'hl') return { color: '', bg: ANS_HL };
+    if (pen === 'r' || pen === 'g' || pen === 'b') return { color: ANS_COLOR[pen], bg: '' };
+    return { color: '#111111', bg: '' };
+  }
+
+  // 把刚打出来的 range 包成当前笔色的 span
+  function wrapRangeWithPen(range) {
+    if (!range || range.collapsed) return;
+    const w = wantStyle();
+    const cur = colorAt(range.startContainer);
+
+    if (pen === 'none') {
+      if (!cur.color && !cur.bg) return;                 // 本来就是黑的
+    } else if (pen === 'hl') {
+      if (cur.bg === cssColor(w.bg, 'backgroundColor')) return;
+    } else {
+      if (cur.color === cssColor(w.color)) return;       // 已经是这支笔的颜色
+    }
+
+    const span = document.createElement('span');
+    if (w.color) span.style.color = w.color;
+    if (w.bg) span.style.backgroundColor = w.bg;
+    try {
+      span.appendChild(range.extractContents());
+      range.insertNode(span);
+    } catch (e) { return; }
+    const sel = window.getSelection();
+    if (sel && span.firstChild) {
+      const r2 = document.createRange();
+      r2.setStart(span.firstChild, span.firstChild.length);
+      r2.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(r2);
+    }
+  }
+
+  // 点色点：有选区就给这段上色；没选区就只换笔色（之后的字跟着变）
+  function setPen(kind) {
+    pen = kind;
+    document.querySelectorAll('#penbar .pk').forEach(b =>
+      b.classList.toggle('on', b.dataset.pen === kind));
+    const range = currentRangeInEditor();
+    // 必须有真实选中的文字才改它；否则只是换笔色
+    if (range && !range.isCollapsed && range.toString().trim()) paintSelection(range, kind);
+  }
+
+  function mountQuiz() {
+    if (!session || session.pos >= session.queue.length) return;
+    const key = 'sensor.draft.' + cur.id;
+    const ta = $('#ta');
+
+    // 草稿：新格式是 HTML，老草稿是纯文本，两种都要能读
+    const draft = localStorage.getItem(key) || '';
+    if (draft) {
+      if (/<(span|br|div|p|b|i|u|mark)\b/i.test(draft)) ta.innerHTML = sanitizeAnswerHtml(draft);
+      else ta.textContent = draft;
+    }
+
+    // 存草稿：去掉零宽字符和空 span
+    const cleanHtml = h => h.replace(/\u200B/g, '').replace(/<span[^>]*><\/span>/g, '');
+    const saveDraft = () => localStorage.setItem(key, cleanHtml(ta.innerHTML));
+
+    // 打了字就立刻按当前笔色包起来（不依赖光标是否在某个 span 里）
+    let compRange = null;
+    ta.addEventListener('compositionstart', () => {
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount) compRange = sel.getRangeAt(0).cloneRange();
+    });
+    ta.addEventListener('compositionend', () => {
+      if (!pen || !compRange) { compRange = null; saveDraft(); return; }
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount) {
+        const r = document.createRange();
+        try {
+          r.setStart(compRange.startContainer, compRange.startOffset);
+          r.setEnd(sel.focusNode, sel.focusOffset);
+          wrapRangeWithPen(r);
+        } catch (e) { }
+      }
+      compRange = null;
+      saveDraft();
+    });
+    ta.addEventListener('input', e => {
+      saveDraft();
+      if (!pen || e.isComposing) return;
+      if (e.inputType !== 'insertText' || !e.data) return;
+      const sel = window.getSelection();
+      if (!sel || !sel.rangeCount || !sel.isCollapsed) return;
+      const node = sel.focusNode, off = sel.focusOffset;
+      if (!node || node.nodeType !== 3) return;
+      const start = off - e.data.length;
+      if (start < 0) return;
+      const r = document.createRange();
+      r.setStart(node, start);
+      r.setEnd(node, off);
+      wrapRangeWithPen(r);
+    });
+    ta.addEventListener('input', saveDraft);
+
+    // 颜色笔：点一下等于换一支笔，接下来打的字就是这个颜色
+    document.querySelectorAll('#penbar .pk').forEach(btn => {
+      // 阻止默认，避免点按钮时把输入框的选区弄丢
+      const keep = e => e.preventDefault();
+      btn.addEventListener('pointerdown', keep);
+      btn.addEventListener('touchstart', keep, { passive: false });
+      btn.addEventListener('mousedown', keep);
+      btn.addEventListener('click', e => {
+        e.preventDefault();
+        setPen(btn.dataset.pen);
+      });
+    });
+
+    const pauseBtn = $('#pauseBtn');
+    if (pauseBtn) pauseBtn.addEventListener('click', () => {
+      saveSessionNow();
+      location.hash = '#home';
+    });
+
+    $('#reveal').addEventListener('click', () => {
+      const past = attemptsOf(cur.id);
+      const ns = notesOf(cur.id);
+      let extra = '';
+      if (past.length) {
+        extra += '<div class="label">我之前的答案（' + past.length + ' 次）</div>';
+        extra += past.slice(-5).reverse().map(a =>
+          '<div class="tl-item"><div class="tl-h">' +
+          '<span class="pill ' + (a.grade === 2 ? 'ok' : a.grade === 1 ? 'mid' : 'no') + '">' +
+          GRADE[a.grade] + '</span>' +
+          '<span class="muted">' + new Date(a.ts).toLocaleString() + '</span></div>' +
+          '<div class="myans rich">' + (a.answer ? answerView(a.answer) : '（没写文字）') + '</div></div>'
+        ).join('');
+      }
+      if (ns.length) {
+        extra += '<div class="label">这题的疑问（' + ns.length + '）</div>' +
+          ns.map(n => '<div class="note-item">' + esc(n.text) + '</div>').join('');
+      }
+      $('#ref').innerHTML = '<div class="label">参考答案</div>' + cur.answer_html + extra;
+      $('#ref').classList.remove('hidden');
+      $('#reveal').classList.add('hidden');
+      $('#gbox').classList.remove('hidden');
+    });
+    document.querySelectorAll('#gbox [data-g]').forEach(b => {
+      b.addEventListener('click', () => {
+        const grade = parseInt(b.dataset.g, 10);
+        const html = ta.innerHTML.replace(/\u200B/g, '');
+        const rec = { id: uid(), qid: cur.id, answer: (ta.textContent.trim() ? html : ''), grade: grade, ts: Date.now() };
+        S.attempts.push(rec);
+        save();
+        // 这题重新做过，取消它之前的手动推迟
+        const sh = loadShift();
+        if (sh[cur.id]) { delete sh[cur.id]; saveShift(sh); }
+        if (cloudReady()) cloudPush([rec]).catch(() => { });   // 后台补传，失败不影响本机
+        localStorage.removeItem(key);
+        session.pos++;
+        saveSessionNow();
+        go('quiz');
+      });
+    });
+  }
+
+  /* ---------------- 导入导出 ---------------- */
+  function exportData() {
+    const payload = { app: 'sensor', version: 1, exportedAt: new Date().toISOString(), attempts: S.attempts };
+    const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'sensor-' + new Date().toISOString().slice(0, 10) + '.json';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+
+  function importData(file) {
+    const r = new FileReader();
+    r.onload = () => {
+      let d;
+      try { d = JSON.parse(r.result); } catch (e) { alert('不是合法的 JSON'); return; }
+      const incoming = (d && d.attempts) || [];
+      const seen = new Set(S.attempts.map(a => a.id));
+      let add = 0;
+      incoming.forEach(a => {
+        if (!a || !a.id || seen.has(a.id)) return;
+        if (!qById(a.qid)) return;      // 本机题库里没有这道题，跳过
+        S.attempts.push(a); seen.add(a.id); add++;
+      });
+      save();
+      alert('合并完成：新增 ' + add + ' 条记录（重复的已跳过）');
+      location.hash = '#home';
+    };
+    r.readAsText(file);
+  }
+
+  /* ---------------- 疑问小窗 ---------------- */
+  const NK = 'sensor.notes.v1';
+  function notesAll() {
+    let o = {};
+    try { o = JSON.parse(localStorage.getItem(NK)) || {}; } catch (e) { o = {}; }
+    // 老数据没有 id，补一个，方便云同步去重
+    let changed = false;
+    Object.keys(o).forEach(qid => {
+      (o[qid] || []).forEach(n => { if (!n.id) { n.id = uid(); changed = true; } });
+    });
+    if (changed) notesSave(o);
+    return o;
+  }
+  function notesSave(o) { localStorage.setItem(NK, JSON.stringify(o)); }
+  function notesOf(qid) { return notesAll()[qid] || []; }
+  function addNote(qid, text) {
+    const o = notesAll();
+    const n = { id: uid(), ts: Date.now(), text: text };
+    (o[qid] = o[qid] || []).push(n);
+    notesSave(o);
+    return { id: n.id, qid: qid, text: n.text, ts: n.ts };
+  }
+  function allNotesFlat() {
+    const o = notesAll(), out = [];
+    Object.keys(o).forEach(qid => (o[qid] || []).forEach(n => out.push({ id: n.id, qid: qid, text: n.text, ts: n.ts })));
+    return out;
+  }
+  async function notesPull() {
+    const res = await fetch(apiBase() + '/rest/v1/s_notes?select=id,qid,text,ts&limit=20000',
+      { headers: hdr(cloudCfg()) });
+    if (!res.ok) throw new Error('notes 拉取 ' + res.status);
+    const rows = await res.json();
+    const o = notesAll();
+    let add = 0;
+    rows.forEach(r => {
+      if (!r || !r.id) return;
+      if (deletedIds().has(r.id)) return;          // 本地删过的不再拉回来
+      const list = (o[r.qid] = o[r.qid] || []);
+      if (list.some(n => n.id === r.id)) return;
+      list.push({ id: r.id, ts: r.ts, text: r.text });
+      add++;
+    });
+    if (add) notesSave(o);
+    return add;
+  }
+  async function notesPush(list) {
+    const del = deletedIds();
+    const payload = (list || allNotesFlat()).filter(n => !del.has(n.id));
+    if (!payload.length) return;
+    const res = await fetch(apiBase() + '/rest/v1/s_notes', {
+      method: 'POST',
+      headers: Object.assign(hdr(cloudCfg()), { 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error('notes 上传 ' + res.status);
+  }
+  const DELK = 'sensor.notes.deleted.v1';
+  function deletedIds() {
+    try { return new Set(JSON.parse(localStorage.getItem(DELK)) || []); } catch (e) { return new Set(); }
+  }
+  function markDeleted(id) {
+    const s = deletedIds();
+    s.add(id);
+    localStorage.setItem(DELK, JSON.stringify([...s]));
+  }
+  function deleteNote(qid, id) {
+    const o = notesAll();
+    o[qid] = (o[qid] || []).filter(n => n.id !== id);
+    if (!o[qid].length) delete o[qid];
+    notesSave(o);
+    markDeleted(id);                               // 本地留墓碑，云端下次也拉不回来
+    if (cloudReady()) {
+      fetch(apiBase() + '/rest/v1/s_notes?id=eq.' + encodeURIComponent(id),
+        { method: 'DELETE', headers: hdr(cloudCfg()) }).catch(() => { });
+    }
+  }
+  function currentQid() {
+    if (session && session.pos < session.queue.length) return session.queue[session.pos].id;
+    return '_general';
+  }
+
+  function refreshNotePanel() {
+    const qid = currentQid();
+    const q = qById(qid);
+    const where = document.getElementById('nwhere');
+    if (where) {
+      where.textContent = q
+        ? '疑问 · ' + q.id + (q.outline_ref ? ' · 出处 ' + q.outline_ref : '')
+        : '疑问 · 通用';
+    }
+    const list = notesOf(qid).slice(-6).reverse();
+    const box = document.getElementById('nlist');
+    if (box) {
+      box.innerHTML = list.length
+        ? list.map(n => '<div class="note-item">' + esc(n.text) +
+          '<span class="t">' + new Date(n.ts).toLocaleString() + '</span></div>').join('')
+        : '<p class="muted" style="margin:0 0 8px">这题还没有疑问记录。</p>';
+    }
+  }
+
+  /* ---------- 疑问面板 ---------- */
+  // 手机端面板是整屏卡片，输入框在最上面，键盘盖不住；
+  // 桌面端仍是从右下角弹出的浮窗。两种都不需要额外锁定滚动。
+  function mountNote() {
+    const fab = document.createElement('button');
+    fab.className = 'fab';
+    fab.id = 'fab';
+    fab.type = 'button';
+    fab.title = '记一笔疑问';
+    fab.textContent = '?';
+
+    const panel = document.createElement('div');
+    panel.className = 'note-panel';
+    panel.id = 'npanel';
+    panel.innerHTML =
+      '<div class="note-head"><b id="nwhere">记一笔疑问</b>' +
+      '<button class="note-x" id="nclose" type="button">收起</button></div>' +
+      '<textarea id="ntext" placeholder="哪里没想明白？一句话就行"></textarea>' +
+      '<div style="margin-top:8px"><button class="btn primary block" id="nsave" type="button">保存</button></div>' +
+      '<div class="note-list" id="nlist"></div>';
+
+    document.body.appendChild(fab);
+    document.body.appendChild(panel);
+
+    const openPanel = () => {
+      refreshNotePanel();
+      panel.classList.add('open');
+      setTimeout(() => { const t = document.getElementById('ntext'); if (t) t.focus(); }, 180);
+    };
+    const closePanel = () => {
+      panel.classList.remove('open');
+    };
+
+    fab.addEventListener('click', () => {
+      if (panel.classList.contains('open')) closePanel(); else openPanel();
+    });
+    document.getElementById('nclose').addEventListener('click', closePanel);
+    document.getElementById('nsave').addEventListener('click', () => {
+      const ta = document.getElementById('ntext');
+      const t = (ta.value || '').trim();
+      if (!t) { closePanel(); return; }
+      const rec = addNote(currentQid(), t);
+      if (cloudReady()) notesPush([rec]).catch(() => { });   // 后台补传
+      ta.value = '';
+      refreshNotePanel();
+      closePanel();               // 记完自动收回小窗
+    });
+    document.getElementById('ntext').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        document.getElementById('nsave').click();
+      }
+    });
+    document.addEventListener('click', e => {
+      if (!panel.classList.contains('open')) return;
+      if (panel.contains(e.target) || e.target === fab) return;
+      closePanel();
+    });
+  }
+
+  /* ---------------- 路由 ---------------- */
+  const VIEWS = { home: viewHome, pick: viewPick, wrong: viewWrong, hist: viewHist,
+                  notes: viewNotes, more: viewMore, quiz: viewQuiz };
+
+  function route() {
+    // hash 里可能带查询串（#pick?mode=wrong），页面名要先把 ? 之后切掉
+    const raw = (location.hash || '#home').slice(1);
+    const name = raw.split('?')[0];
+    const v = VIEWS[name] || viewHome;
+    app().innerHTML = v();
+    document.querySelectorAll('.tabbar a').forEach(a => {
+      a.classList.toggle('on', a.dataset.tab === name);
+    });
+    if (name === 'wrong') {
+      const d = $('#drill');
+      if (d) d.addEventListener('click', () => { location.hash = '#pick?mode=wrong'; });
+    }
+    if (name === 'hist') {
+      document.querySelectorAll('.day-head').forEach(h => {
+        h.addEventListener('click', () => {
+          const d = h.parentElement;
+          d.classList.toggle('open');
+          const k = d.dataset.day;
+          if (d.classList.contains('open')) openDays.add(k); else openDays.delete(k);
+        });
+      });
+    }
+    if (name === 'notes') {
+      document.querySelectorAll('.del').forEach(b => {
+        b.addEventListener('click', () => {
+          const parts = (b.dataset.del || '').split('|');
+          if (!confirm('删掉这条疑问？')) return;
+          deleteNote(parts[0], parts[1]);
+          route();
+        });
+      });
+    }
+    if (name === 'home') {
+      document.querySelectorAll('[data-mode=wrong]').forEach(a =>
+        a.addEventListener('click', () => { location.hash = '#pick?mode=wrong'; }));
+      const rb = $('#doreview');
+      if (rb) rb.addEventListener('click', () => {
+        startSession(dueList().map(x => x.q));
+      });
+      document.querySelectorAll('.wk-row').forEach(row => {
+        row.addEventListener('click', () => startTopic(row.dataset.topic));
+      });
+      const contBtn = $('#contbtn');
+      if (contBtn) contBtn.addEventListener('click', () => {
+        const saved = loadSavedSession();
+        if (!saved) { route(); return; }
+        session = saved;
+        go('quiz');
+      });
+      const dropBtn = $('#dropbtn');
+      if (dropBtn) dropBtn.addEventListener('click', () => {
+        if (!confirm('放弃这一轮？已作答的题会保留，只是不再继续这个队列。')) return;
+        clearSavedSession();
+        session = null;
+        route();
+      });
+      // 复习题重新分配
+      document.querySelectorAll('[data-spread]').forEach(b => {
+        b.addEventListener('click', () => {
+          const days = parseInt(b.dataset.spread, 10);
+          const n = applySpread(days);
+          spreadMsg = n
+            ? '已把 ' + n + ' 道到期的题摊到未来 ' + days + ' 天，约每天 ' + Math.ceil(n / days) + ' 题。做过一次就自动回原节奏。'
+            : '现在没有积压的题。';
+          route();
+        });
+      });
+      const unshift = $('#unshift');
+      if (unshift) unshift.addEventListener('click', () => {
+        localStorage.removeItem(SHIFT_KEY);
+        spreadMsg = '已恢复原来的复习计划。';
+        route();
+      });
+    }
+    if (name === 'pick') {
+      $('#go').addEventListener('click', () => startSession(pickQuestions()));
+      // 点模块名收起/展开（点复选框不触发）
+      document.querySelectorAll('.mod-row').forEach(row => {
+        row.addEventListener('click', e => {
+          if (e.target.classList.contains('cbt')) return;
+          const mod = row.dataset.mod;
+          if (openMod.has(mod)) openMod.delete(mod); else openMod.add(mod);
+          const keep = document.getElementById('root').scrollTop;
+          route();
+          document.getElementById('root').scrollTop = keep;
+        });
+      });
+      // 复选框：整组 / 单个 选中
+      document.querySelectorAll('.cbt[data-scope]').forEach(cb => {
+        cb.addEventListener('change', e => {
+          e.stopPropagation();
+          onScopeToggle(cb.dataset.scope, cb.checked);
+        });
+        cb.addEventListener('click', e => e.stopPropagation());
+      });
+      // 章标题：点空白处展开/收起（点复选框不触发）
+      document.querySelectorAll('.acc-head').forEach(h => {
+        h.addEventListener('click', e => {
+          if (e.target.classList.contains('cbt')) return;
+          const acc = h.parentElement;
+          acc.classList.toggle('open');
+          const k = acc.dataset.ch;
+          if (acc.classList.contains('open')) openCh.add(k); else openCh.delete(k);
+        });
+      });
+      syncPickUI();
+      const m = new URLSearchParams((location.hash.split('?')[1]) || '');
+      if (m.get('mode') === 'wrong') {
+        const r = document.querySelector('input[name=mode][value=wrong]');
+        if (r) r.checked = true;
+      }
+    }
+    if (name === 'quiz') mountQuiz();
+    if (name === 'more') {
+      $('#csave').addEventListener('click', async () => {
+        const url = normUrl($('#curl').value);
+        const key = ($('#ckey').value || '').trim();
+        if (!url || !key) { alert('两项都要填'); return; }
+        saveCfg({ url: url, key: key, lastSync: 0 });
+        setStatus('测试连接中…');
+        await syncAll(false);
+      });
+      $('#csync').addEventListener('click', () => syncAll(false));
+      $('#exp').addEventListener('click', exportData);
+      $('#imp').addEventListener('click', () => $('#file').click());
+      $('#file').addEventListener('change', e => { if (e.target.files[0]) importData(e.target.files[0]); });
+      $('#clr').addEventListener('click', () => {
+        if (confirm('清空本机所有作答记录？此操作不可撤销，建议先导出。')) {
+          S = { attempts: [] }; save(); location.hash = '#home';
+        }
+      });
+    }
+    // 现在滚动发生在 #root 里，不再滚 window
+    const rootEl = document.getElementById('root');
+    if (rootEl) rootEl.scrollTop = 0;
+    // 切到任何页面都顺手对一次账（10 秒内不重复）
+    if (cloudReady() && !syncing && (Date.now() - (cloudCfg().lastSync || 0)) > 10000) {
+      syncAll(true);
+    }
+  }
+
+  function boot() {
+    // 底栏放在 #root 外面：body 是 flex 列，#root 自己滚，底栏永远不动
+    document.getElementById('root').innerHTML = '<div class="wrap" id="app"></div>';
+    document.body.insertAdjacentHTML('beforeend', nav());
+    window.addEventListener('hashchange', route);
+    mountNote();
+    // 自检钩子：?selftest=1 进答题卡（可跟题号，如 ?selftest=9）
+    const st = location.search.match(/[?&]selftest=(\d+)/);
+    if (st && BANK.length) {
+      const i = Math.max(0, Math.min(parseInt(st[1], 10) - 1, BANK.length - 1));
+      session = { queue: BANK.slice(i, i + 3), pos: 0 };
+      location.hash = '#quiz';
+    }
+    // 直接打开 #quiz（比如刷新页面）时，把上次没做完的那一轮接回来
+    if (!session && location.hash.indexOf('#quiz') === 0) {
+      const saved = loadSavedSession();
+      if (saved) session = saved;
+    }
+    route();
+    if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+      navigator.serviceWorker.register('./sw.js').catch(() => { });
+    }
+    // 配了云同步就在启动时悄悄对一次账
+    if (cloudReady()) setTimeout(() => syncAll(true), 600);
+
+    // 手机切回前台 / 从后台恢复时也对一次账（这是"手机看不到最新记录"的常见原因）
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState !== 'visible') return;
+      if (!cloudReady() || syncing) return;
+      if (Date.now() - (cloudCfg().lastSync || 0) < 8000) return;
+      syncAll(true);
+    });
+    window.addEventListener('focus', () => {
+      if (!cloudReady() || syncing) return;
+      if (Date.now() - (cloudCfg().lastSync || 0) < 8000) return;
+      syncAll(true);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', boot);
+})();
+</script>
+</body>
+</html>
