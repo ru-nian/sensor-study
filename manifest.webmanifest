@@ -1,0 +1,10 @@
+{
+ "name": "传感器刷题",
+ "short_name": "传感器",
+ "start_url": "./index.html",
+ "scope": "./",
+ "display": "standalone",
+ "background_color": "#f5f6f8",
+ "theme_color": "#0f766e",
+ "orientation": "portrait"
+}
